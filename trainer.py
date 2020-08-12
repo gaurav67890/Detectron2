@@ -1,5 +1,7 @@
 # Some basic setup:
 # Setup detectron2 logger
+import argparse
+import hypertune
 import detectron2
 from detectron2.utils.logger import setup_logger
 setup_logger()
@@ -25,10 +27,13 @@ from pycocotools import coco
 import torch
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-
-
-
 from detectron2.data.datasets import register_coco_instances
+
+parser = argparse.ArgumentParser(description='Input parameters need to be Specified for hypertuning')
+parser.add_argument('--lr', default=0.001, type=float, help='Learning rate parameter')
+args = parser.parse_args()
+lr = args.lr
+
 train_json="/share/split_damages/datasets/coco/scratch/annotations/instances_train.json"
 val_json="/share/split_damages/datasets/coco/scratch/annotations/instances_validation.json"
 test_json="/share/split_damages/datasets/coco/scratch/annotations/instances_test.json"
@@ -46,7 +51,7 @@ cfg.DATASETS.TEST = ("scratch_val",)
 cfg.DATALOADER.NUM_WORKERS = 4
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml")  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 1
-cfg.SOLVER.BASE_LR = 0.001  # pick a good LR
+cfg.SOLVER.BASE_LR = lr  # pick a good LR
 cfg.SOLVER.MAX_ITER = 4000 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (scratch)
 cfg.TEST.EVAL_PERIOD = 500
@@ -115,3 +120,5 @@ print('Dice Coeff: '+str(final_dice))
 
 
 
+hpt = hypertune.HyperTune()
+hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=epochs)

@@ -1,0 +1,15 @@
+trainingInput:
+  scaleTier : CUSTOM
+  masterType: complex_model_m_p100
+  hyperparameters: 
+    goal: MAXIMIZE
+    maxTrials: 5
+    maxParallelTrials: 1
+    hyperparameterMetricTag: dice
+    enableTrialEarlyStopping: True
+    params:
+      - parameterName: lr
+        type: DOUBLE
+        minValue: 0.0001
+        maxValue: 0.001
+        scaleType: UNIT_LINEAR_SCALE
