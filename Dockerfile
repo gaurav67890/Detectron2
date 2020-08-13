@@ -43,7 +43,7 @@ WORKDIR /home/appuser/detectron2_repo
 
 COPY split_damages .
 
-#ENTRYPOINT ["python3","trainer.py"]
+ENTRYPOINT ["python3","trainer.py"]
 
 # run detectron2 under user "appuser":
 # wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
