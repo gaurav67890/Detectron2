@@ -41,7 +41,9 @@ RUN pip install --user -e detectron2_repo
 ENV FVCORE_CACHE="/tmp"
 WORKDIR /home/appuser/detectron2_repo
 
-ENTRYPOINT ["python3","trainer.py"]
+COPY split_damages .
+
+#ENTRYPOINT ["python3","trainer.py"]
 
 # run detectron2 under user "appuser":
 # wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
