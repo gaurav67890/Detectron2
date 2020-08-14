@@ -121,4 +121,4 @@ print('Dice Coeff: '+str(final_dice))
 
 
 hpt = hypertune.HyperTune()
-hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=epochs)
+hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=10)
