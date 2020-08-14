@@ -8,13 +8,13 @@ RUN apt-get update && apt-get install -y \
 RUN ln -sv /usr/bin/python3 /usr/bin/python
 
 # create a non-root user
-#ARG USER_ID=1000
-#RUN useradd -m --no-log-init --system  --uid ${USER_ID} appuser -g sudo
-#RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-#USER appuser
-WORKDIR /home
+ARG USER_ID=1000
+RUN useradd -m --no-log-init --system  --uid ${USER_ID} appuser -g sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER appuser
+WORKDIR /home/appuser
 
-ENV PATH="/home/.local/bin:${PATH}"
+ENV PATH="/home/appuser/.local/bin:${PATH}"
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
 	python3 get-pip.py --user && \
 	rm get-pip.py
@@ -23,7 +23,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 # See https://pytorch.org/ for other options if you use a different version of CUDA
 RUN pip install --user tensorboard
 RUN pip install --user torch==1.5 torchvision==0.6 -f https://download.pytorch.org/whl/cu101/torch_stable.html
-RUN pip install pandas google-cloud-storage cloudml-hypertune
+RUN pip install --user pandas google-cloud-storage cloudml-hypertune
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 # install detectron2
@@ -39,7 +39,7 @@ RUN pip install --user -e detectron2_repo
 
 # Set a fixed model cache directory.
 ENV FVCORE_CACHE="/tmp"
-WORKDIR /home/detectron2_repo
+WORKDIR /home/appuser/detectron2_repo
 
 COPY split_damages .
 
