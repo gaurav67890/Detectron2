@@ -30,7 +30,7 @@ from detectron2.data.datasets import register_coco_instances
 
 test_json="/share/datasets/coco/scratch/annotations/instances_test.json"
 img_dir="/share/datasets/coco/images/"
-register_coco_instances("scratch_test", {}, val_json, img_dir)
+register_coco_instances("scratch_test", {}, test_json, img_dir)
 
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
