@@ -16,9 +16,10 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 
 RUN pip install --user tensorboard
 RUN pip install --user torch==1.5 torchvision==0.6 -f https://download.pytorch.org/whl/cu101/torch_stable.html
+RUN pip install pandas google-cloud-storage cloudml-hypertune
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
-RUN git clone https://github.com/facebookresearch/detectron2 detectron2_repo
+RUN git clone https://github.com/gaurav67890/Detectron2 detectron2_repo
 	
 ENV FORCE_CUDA="1"
 
