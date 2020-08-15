@@ -33,6 +33,6 @@ ENV FVCORE_CACHE="/tmp"
 
 WORKDIR /detectron2_repo
 
-#COPY split_damages .
+COPY split_damages .
 
-#ENTRYPOINT ["python3","trainer.py"]
+ENTRYPOINT ["python3","trainer.py"]
