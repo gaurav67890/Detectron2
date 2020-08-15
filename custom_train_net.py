@@ -34,11 +34,11 @@ from detectron2.data.datasets import register_coco_instances
 #args = parser.parse_args()
 #lr = args.lr
 
-train_json="/share/split_damages/datasets/coco/scratch/annotations/instances_train.json"
-val_json="/share/split_damages/datasets/coco/scratch/annotations/instances_validation.json"
-test_json="/share/split_damages/datasets/coco/scratch/annotations/instances_test.json"
+train_json="/share/datasets/coco/scratch/annotations/instances_train.json"
+val_json="/share/datasets/coco/scratch/annotations/instances_validation.json"
+test_json="/share/datasets/coco/scratch/annotations/instances_test.json"
 
-img_dir="/share/split_damages/datasets/coco/images/"
+img_dir="/share/datasets/coco/images/"
 register_coco_instances("scratch_train", {}, train_json, img_dir)
 register_coco_instances("scratch_val", {}, val_json, img_dir)
 register_coco_instances("scratch_test", {}, val_json, img_dir)
