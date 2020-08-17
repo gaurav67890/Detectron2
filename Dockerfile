@@ -33,6 +33,8 @@ ENV FVCORE_CACHE="/tmp"
 
 WORKDIR /detectron2_repo
 
-COPY split_damages .
+RUN gsutil cp gs://hptuning/split_damages.zip .
+RUN unzip split_damages.zip
+#COPY split_damages .
 
 ENTRYPOINT ["python3","trainer.py"]

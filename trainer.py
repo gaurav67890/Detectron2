@@ -15,6 +15,7 @@ import urllib
 # import some common libraries
 import numpy as np
 import os, json, cv2, random
+print(os.system('ls'))
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 # import some common detectron2 utilities
@@ -28,6 +29,7 @@ import torch
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data.datasets import register_coco_instances
+from google.cloud import storage
 
 parser = argparse.ArgumentParser(description='Input parameters need to be Specified for hypertuning')
 parser.add_argument('--lr', default=0.001, type=float, help='Learning rate parameter')
@@ -122,3 +124,17 @@ print('Dice Coeff: '+str(final_dice))
 
 hpt = hypertune.HyperTune()
 hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=10)
+
+
+# Export the model to a file
+model_filename = 'model_detectron2'
+joblib.dump(rf_regressor, model_filename)job_dir =  args.job_dir.replace('gs://', '')
+# Get the Bucket Id
+bucket_id = job_dir.split('/')[0]
+# Get the path
+bucket_path = job_dir.lstrip('{}/'.format(bucket_id))# Upload the model to GCS
+bucket = storage.Client().bucket(bucket_id)
+blob = bucket.blob('{}/{}'.format(
+    bucket_path,
+    model_filename))
+blob.upload_from_filename(model_filename)
