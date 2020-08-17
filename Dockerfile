@@ -48,4 +48,4 @@ WORKDIR /detectron2_repo
 
 #COPY split_damages .
 
-#ENTRYPOINT ["python3","trainer.py"]
+ENTRYPOINT ["python3","trainer.py"]
