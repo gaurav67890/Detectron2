@@ -16,6 +16,7 @@ import urllib
 import numpy as np
 import os, json, cv2, random
 print(os.system('ls'))
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 # import some common detectron2 utilities
@@ -125,7 +126,7 @@ print('Dice Coeff: '+str(final_dice))
 hpt = hypertune.HyperTune()
 hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=10)
 
-
+bucket = storage.Client().bucket('hptuning2')
 # Export the model to a file
 model_filename = 'model_detectron2'
 joblib.dump(rf_regressor, model_filename)job_dir =  args.job_dir.replace('gs://', '')
