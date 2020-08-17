@@ -33,6 +33,11 @@ from detectron2.data.datasets import register_coco_instances
 from google.cloud import storage
 
 parser = argparse.ArgumentParser(description='Input parameters need to be Specified for hypertuning')
+parser.add_argument(
+    '--job-dir',  # Handled automatically by AI Platform
+    help='GCS location to write checkpoints and export models',
+    required=True
+    )
 parser.add_argument('--lr', default=0.001, type=float, help='Learning rate parameter')
 args = parser.parse_args()
 lr = args.lr
