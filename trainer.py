@@ -89,11 +89,11 @@ register_coco_instances("scratch_test", {}, val_json, img_dir)
 
 
 cfg = get_cfg()
-cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml"))
+cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
 cfg.DATASETS.TRAIN = ("scratch_train",)
 cfg.DATASETS.TEST = ("scratch_val",)
 cfg.DATALOADER.NUM_WORKERS = 4
-cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml")  # Let training initialize from mode$
+cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 8
 cfg.SOLVER.MAX_ITER = 50000 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (scratch)
@@ -121,7 +121,7 @@ trainer.train()
 
 
 cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7   # set a custom testing threshold for this model
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
 
 
 from detectron2.data import build_detection_test_loader
