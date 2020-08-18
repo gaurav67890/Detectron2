@@ -41,9 +41,42 @@ parser.add_argument(
     help='GCS location to write checkpoints and export models',
     required=True
     )
-parser.add_argument('--lr', default=0.001, type=float, help='Learning rate parameter')
+parser.add_argument(
+    '--lr', default=0.00025, 
+    type=float, 
+    help='Learning rate parameter')
+parser.add_argument('--MOMENTUM',  # Specified in the config file
+    type=float,
+    default=0.5,
+    help='SGD momentum (default: 0.5)')
+parser.add_argument('--ANCHOR_SIZES',  # Specified in the config file
+    type=int,
+    default=3,
+    help='ANCHOR_SIZES (default: 3)')
+parser.add_argument('--PRE_NMS_TOPK_TRAIN',  # Specified in the config file
+    type=int,
+    default=12000,
+    help='PRE_NMS_TOPK_TRAIN (default: 12000)')
+parser.add_argument('--PRE_NMS_TOPK_TEST',  # Specified in the config file
+    type=int,
+    default=12000,
+    help='PRE_NMS_TOPK_TEST (default: 6000)')
+parser.add_argument('--POST_NMS_TOPK_TRAIN',  # Specified in the config file
+    type=int,
+    default=2000,
+    help='POST_NMS_TOPK_TRAIN (default: 2000)')
+parser.add_argument('--POST_NMS_TOPK_TEST',  # Specified in the config file
+    type=int,
+    default=1000,
+    help='POST_NMS_TOPK_TEST (default: 1000)')
+
+parser.add_argument('--NMS_THRESH',  # Specified in the config file
+    type=float,
+    default=0.7,
+    help='NMS_THRESH (default: 0.7)')
+
+
 args = parser.parse_args()
-lr = args.lr
 
 train_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_train.json"
 val_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_validation.json"
@@ -61,12 +94,24 @@ cfg.DATASETS.TRAIN = ("scratch_train",)
 cfg.DATASETS.TEST = ("scratch_val",)
 cfg.DATALOADER.NUM_WORKERS = 4
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml")  # Let training initialize from mode$
-cfg.SOLVER.IMS_PER_BATCH = 1
-cfg.SOLVER.BASE_LR = lr  # pick a good LR
-cfg.SOLVER.MAX_ITER = 4000 
+cfg.SOLVER.IMS_PER_BATCH = 8
+cfg.SOLVER.MAX_ITER = 50000 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (scratch)
-cfg.TEST.EVAL_PERIOD = 500
-
+cfg.TEST.EVAL_PERIOD = 5000
+cfg.MOMENTUM=args.MOMENTUM
+cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
+cfg.MODEL.RPN.NMS_THRESH=args.NMS_THRESH
+cfg.RPN.PRE_NMS_TOPK_TRAIN=args.PRE_NMS_TOPK_TRAIN
+cfg.RPN.PRE_NMS_TOPK_TEST=args.PRE_NMS_TOPK_TEST
+cfg.RPN.POST_NMS_TOPK_TRAIN=args.POST_NMS_TOPK_TRAIN
+cfg.RPN.POST_NMS_TOPK_TEST=args.POST_NMS_TOPK_TEST
+if (args.ANCHOR_SIZES==1):
+    ANCHOR_SIZES="(8,16,32, 64, 128)"
+elif(args.ANCHOR_SIZES==2) :
+    ANCHOR_SIZES ="(16, 32, 64, 128, 256)"
+else:
+    ANCHOR_SIZES ="(32, 64, 128, 256,512)"
+cfg.ANCHOR_GENERATOR.SIZES=ANCHOR_SIZES
 
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
 #trainer = CocoTrainer(cfg) 
