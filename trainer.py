@@ -134,16 +134,21 @@ print('Dice Coeff: '+str(final_dice))
 hpt = hypertune.HyperTune()
 hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=10)
 
-bucket = storage.Client().bucket('hptuning2')
-# Export the model to a file
-model_filename = 'model_final.pth'
-joblib.dump(rf_regressor, model_filename)job_dir =  args.job_dir.replace('gs://', '')
-# Get the Bucket Id
-bucket_id = job_dir.split('/')[0]
-# Get the path
-bucket_path = job_dir.lstrip('{}/'.format(bucket_id))# Upload the model to GCS
-bucket = storage.Client().bucket(bucket_id)
-blob = bucket.blob('{}/{}'.format(
-    bucket_path,
-    model_filename))
-blob.upload_from_filename(model_filename)
+
+def save_model(job_dir, model_name):
+    """Saves the model to Google Cloud Storage"""
+    # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
+    job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
+    # Get the Bucket Id
+    bucket_id = job_dir.split('/')[0]
+    # Get the path. Example: 'hptuning_sonar/1'
+    bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
+
+    # Upload the model to GCS
+    bucket = storage.Client().bucket(bucket_id)
+    blob = bucket.blob('{}/{}'.format(
+        bucket_path,
+        model_name))
+    blob.upload_from_filename(model_name)
+
+save_model(args.job_dir,"model_final.pth")
