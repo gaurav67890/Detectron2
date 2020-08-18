@@ -17,6 +17,9 @@ import numpy as np
 import os, json, cv2, random
 print(os.system('ls'))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
+os.system('gsutil cp gs://hptuning/split_damages.zip .')
+os.system('unzip split_damages.zip')
+
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 # import some common detectron2 utilities
