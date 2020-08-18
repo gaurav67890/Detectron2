@@ -149,6 +149,6 @@ def save_model(job_dir, model_name):
     blob = bucket.blob('{}/{}'.format(
         bucket_path,
         model_name))
-    blob.upload_from_filename(model_name)
+    blob.upload_from_filename('output/'+model_name)
 
 save_model(args.job_dir,"model_final.pth")
