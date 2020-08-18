@@ -3,13 +3,60 @@ trainingInput:
   masterType: complex_model_m_p100
   hyperparameters: 
     goal: MAXIMIZE
-    maxTrials: 5
+    maxTrials: 100
     maxParallelTrials: 1
     hyperparameterMetricTag: dice
     enableTrialEarlyStopping: True
     params:
       - parameterName: lr
         type: DOUBLE
-        minValue: 0.0001
+        minValue: 0.00025
         maxValue: 0.001
         scaleType: UNIT_LINEAR_SCALE
+
+      - parameterName: MOMENTUM
+        type: DOUBLE
+        minValue: 0.4
+        maxValue: 0.95
+        scaleType: UNIT_LINEAR_SCALE
+
+      - parameterName: ANCHOR_SIZES
+        type: INTEGER
+        minValue: 1
+        maxValue: 3
+        scaleType: UNIT_LINEAR_SCALE
+
+      - parameterName: PRE_NMS_TOPK_TRAIN
+        type: DISCRETE
+        discreteValues:
+        - 12000
+        - 18000
+        - 24000
+
+      - parameterName: PRE_NMS_TOPK_TEST
+        type: DISCRETE
+        discreteValues:
+        - 6000
+        - 9000
+        - 12000
+
+      - parameterName: POST_NMS_TOPK_TRAIN
+        type: DISCRETE
+        discreteValues:
+        - 1800
+        - 2000
+        - 2200
+
+      - parameterName: POST_NMS_TOPK_TEST
+        type: DISCRETE
+        discreteValues:
+        - 1800
+        - 2000
+        - 2200
+
+      - parameterName: NMS_THRESH
+        type: DOUBLE
+        minValue: 0.00025
+        maxValue: 0.001
+        scaleType: UNIT_LINEAR_SCALE
+
