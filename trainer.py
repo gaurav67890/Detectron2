@@ -136,7 +136,7 @@ hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric
 
 bucket = storage.Client().bucket('hptuning2')
 # Export the model to a file
-model_filename = 'model_detectron2'
+model_filename = 'model_detectron2.pth'
 joblib.dump(rf_regressor, model_filename)job_dir =  args.job_dir.replace('gs://', '')
 # Get the Bucket Id
 bucket_id = job_dir.split('/')[0]
