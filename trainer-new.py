@@ -97,10 +97,10 @@ cfg.DATASETS.TRAIN = ("scratch_train",)
 cfg.DATASETS.TEST = ("scratch_val",)
 cfg.DATALOADER.NUM_WORKERS = 4
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
-cfg.SOLVER.IMS_PER_BATCH = 8
-cfg.SOLVER.MAX_ITER = 10000 
+cfg.SOLVER.IMS_PER_BATCH = 2
+cfg.SOLVER.MAX_ITER = 1000 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (scratch)
-cfg.SOLVER.CHECKPOINT_PERIOD = 2000
+cfg.SOLVER.CHECKPOINT_PERIOD = 200
 #cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
@@ -137,7 +137,7 @@ for i in model_list:
         val_loader = build_detection_test_loader(cfg, "scratch_test")
         results=inference_on_dataset(trainer.model, val_loader, evaluator)
         map_val=results['segm']['AP50']
-        map_dict[i]=i
+        map_dict[i]=map_val
 final_model = max(map_dict, key=map_dict.get) 
 final_map=map_dict[final_model]
 
