@@ -101,7 +101,7 @@ cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask
 cfg.SOLVER.IMS_PER_BATCH = 1
 cfg.SOLVER.MAX_ITER = 600 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
-cfg.SOLVER.CHECKPOINT_PERIOD = 200
+cfg.SOLVER.CHECKPOINT_PERIOD = 300
 #cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
@@ -128,6 +128,7 @@ trainer.train()
 #cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
 #evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
+cfg.DATASETS.TEST = ("dent_test",)
 
 try:
     os.remove('output/last_checkpoint')
@@ -139,7 +140,11 @@ model_list=glob.glob('output/*.pth')
 for i in model_list:
     if 'model' in i:
         #print('Model name: '+i)
+        if 'final' in i:
+            continue
+        from detectron2.evaluation import inference_on_dataset
         cfg.MODEL.WEIGHTS = i
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5   # set a custom testing threshold for this model
         predictor = DefaultPredictor(cfg)
         val_loader = build_detection_test_loader(cfg, "dent_test")
         evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
