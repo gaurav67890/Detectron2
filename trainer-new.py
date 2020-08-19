@@ -89,7 +89,7 @@ test_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instanc
 img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
 register_coco_instances("dent_train", {}, train_json, img_dir)
 register_coco_instances("dent_val", {}, val_json, img_dir)
-register_coco_instances("dent_test", {}, val_json, img_dir)
+register_coco_instances("dent_test", {}, test_json, img_dir)
 
 
 cfg = get_cfg()
