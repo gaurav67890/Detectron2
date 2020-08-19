@@ -56,7 +56,7 @@ trainingInput:
 
       - parameterName: NMS_THRESH
         type: DOUBLE
-        minValue: 0.00025
-        maxValue: 0.001
+        minValue: 0.6
+        maxValue: 0.8
         scaleType: UNIT_LINEAR_SCALE
 
