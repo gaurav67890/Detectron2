@@ -5,7 +5,7 @@ trainingInput:
     goal: MAXIMIZE
     maxTrials: 100
     maxParallelTrials: 1
-    hyperparameterMetricTag: MAP
+    hyperparameterMetricTag: dice
     enableTrialEarlyStopping: True
     params:
       - parameterName: lr
