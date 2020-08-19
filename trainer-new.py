@@ -10,6 +10,7 @@ try:
 except ImportError:
     from PIL import Image
 import PIL
+import json
 Image.MAX_IMAGE_PIXELS = 933120000
 import urllib
 # import some common libraries
@@ -128,27 +129,36 @@ trainer.train()
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
 #evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
 
+try:
+    os.remove('output/last_checkpoint')
+except OSError:
+    pass
+
 map_dict={}
 model_list=glob.glob('output/*.pth')
 for i in model_list:
     if 'model' in i:
-        print('Model name: '+i)
+        #print('Model name: '+i)
         cfg.MODEL.WEIGHTS = i
         predictor = DefaultPredictor(cfg)
         val_loader = build_detection_test_loader(cfg, "scratch_test")
         evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
         results=inference_on_dataset(trainer.model, val_loader, evaluator)
         map_val=results['segm']['AP50']
+        print('Model name: '+i)
+        print('MAP value: ',map_val)
         map_dict[i]=map_val
 final_model = max(map_dict, key=map_dict.get) 
 final_map=map_dict[final_model]
-
+map_dict_name='map_dict.json'
+with open(map_dict_name, 'w') as outfile:
+    json.dump(map_dict,outfile,indent=4,ensure_ascii = False)
 
 hpt = hypertune.HyperTune()
 hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='MAP', metric_value=final_map, global_step=0)
 
 
-def save_model(job_dir, model_name):
+def save_model(job_dir, model_name,map_dict):
     """Saves the model to Google Cloud Storage"""
     # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
     job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
@@ -163,5 +173,9 @@ def save_model(job_dir, model_name):
         bucket_path,
         model_name[model_name.rfind('/')+1:]))
     blob.upload_from_filename(model_name)
+    blob= bucket.blob('{}/{}'.format(
+        bucket_path,
+        map_dict))
+    blob.upload_from_filename(map_dict)
 
-save_model(args.job_dir,final_model)
+save_model(args.job_dir,final_model,map_dict_name)
