@@ -132,6 +132,7 @@ map_dict={}
 model_list=glob.glob('output/*.pth')
 for i in model_list:
     if 'model' in i:
+        print('Model name: '+i)
         cfg.MODEL.WEIGHTS = i
         predictor = DefaultPredictor(cfg)
         val_loader = build_detection_test_loader(cfg, "scratch_test")
