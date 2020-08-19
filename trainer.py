@@ -78,25 +78,25 @@ parser.add_argument('--NMS_THRESH',  # Specified in the config file
 
 args = parser.parse_args()
 
-train_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_train.json"
-val_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_validation.json"
-test_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_test.json"
+train_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instances_train.json"
+val_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instances_validation.json"
+test_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instances_test.json"
 
 img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
-register_coco_instances("scratch_train", {}, train_json, img_dir)
-register_coco_instances("scratch_val", {}, val_json, img_dir)
-register_coco_instances("scratch_test", {}, val_json, img_dir)
+register_coco_instances("dent_train", {}, train_json, img_dir)
+register_coco_instances("dent_val", {}, val_json, img_dir)
+register_coco_instances("dent_test", {}, val_json, img_dir)
 
 
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
-cfg.DATASETS.TRAIN = ("scratch_train",)
-cfg.DATASETS.TEST = ("scratch_val",)
+cfg.DATASETS.TRAIN = ("dent_train",)
+cfg.DATASETS.TEST = ("dent_val",)
 cfg.DATALOADER.NUM_WORKERS = 4
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 8
 cfg.SOLVER.MAX_ITER = 20000 
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (scratch)
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
 cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
@@ -125,9 +125,9 @@ cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold f
 
 
 from detectron2.data import build_detection_test_loader
-evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
+evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
 predictor = DefaultPredictor(cfg)
-val_loader = build_detection_test_loader(cfg, "scratch_test")
+val_loader = build_detection_test_loader(cfg, "dent_test")
 #print(inference_on_dataset(trainer.model, val_loader, evaluator))
 # another equivalent way is to use trainer.test
 

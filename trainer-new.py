@@ -82,25 +82,25 @@ if os.path.exists('output') and os.path.isdir('output'):
 
 args = parser.parse_args()
 
-train_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_train.json"
-val_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_validation.json"
-test_json="/detectron2_repo/split_damages/datasets/coco/scratch/annotations/instances_test.json"
+train_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instances_train.json"
+val_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instances_validation.json"
+test_json="/detectron2_repo/split_damages/datasets/coco/dent/annotations/instances_test.json"
 
 img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
-register_coco_instances("scratch_train", {}, train_json, img_dir)
-register_coco_instances("scratch_val", {}, val_json, img_dir)
-register_coco_instances("scratch_test", {}, val_json, img_dir)
+register_coco_instances("dent_train", {}, train_json, img_dir)
+register_coco_instances("dent_val", {}, val_json, img_dir)
+register_coco_instances("dent_test", {}, val_json, img_dir)
 
 
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
-cfg.DATASETS.TRAIN = ("scratch_train",)
-cfg.DATASETS.TEST = ("scratch_val",)
+cfg.DATASETS.TRAIN = ("dent_train",)
+cfg.DATASETS.TEST = ("dent_val",)
 cfg.DATALOADER.NUM_WORKERS = 4
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 1
 cfg.SOLVER.MAX_ITER = 600 
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (scratch)
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
 cfg.SOLVER.CHECKPOINT_PERIOD = 200
 #cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
@@ -127,7 +127,7 @@ trainer.train()
 
 #cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
-#evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
+#evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
 
 try:
     os.remove('output/last_checkpoint')
@@ -141,8 +141,8 @@ for i in model_list:
         #print('Model name: '+i)
         cfg.MODEL.WEIGHTS = i
         predictor = DefaultPredictor(cfg)
-        val_loader = build_detection_test_loader(cfg, "scratch_test")
-        evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
+        val_loader = build_detection_test_loader(cfg, "dent_test")
+        evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
         results=inference_on_dataset(trainer.model, val_loader, evaluator)
         map_val=results['segm']['AP50']
         print('Model name: '+i)
