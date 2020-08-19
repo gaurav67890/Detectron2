@@ -126,7 +126,7 @@ trainer.train()
 
 #cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
-evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
+#evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
 
 map_dict={}
 model_list=glob.glob('output/*.pth')
@@ -135,6 +135,7 @@ for i in model_list:
         cfg.MODEL.WEIGHTS = i
         predictor = DefaultPredictor(cfg)
         val_loader = build_detection_test_loader(cfg, "scratch_test")
+        evaluator = COCOEvaluator("scratch_test", cfg, False,output_dir="./output/")
         results=inference_on_dataset(trainer.model, val_loader, evaluator)
         map_val=results['segm']['AP50']
         map_dict[i]=map_val
