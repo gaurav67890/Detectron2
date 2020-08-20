@@ -78,7 +78,7 @@ parser.add_argument('--NMS_THRESH',  # Specified in the config file
     help='NMS_THRESH (default: 0.7)')
 
 if os.path.exists('output') and os.path.isdir('output'):
-    shutil.rmtree(dirpath)
+    shutil.rmtree('output')
 
 args = parser.parse_args()
 
