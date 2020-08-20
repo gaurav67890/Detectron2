@@ -96,12 +96,12 @@ cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
 cfg.DATASETS.TRAIN = ("dent_train",)
 cfg.DATASETS.TEST = ("dent_val",)
-cfg.DATALOADER.NUM_WORKERS = 4
+cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
-cfg.SOLVER.IMS_PER_BATCH = 1
-cfg.SOLVER.MAX_ITER = 600 
+cfg.SOLVER.IMS_PER_BATCH = 8
+cfg.SOLVER.MAX_ITER = 6000 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
-cfg.SOLVER.CHECKPOINT_PERIOD = 300
+cfg.SOLVER.CHECKPOINT_PERIOD = 500
 #cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
@@ -191,13 +191,13 @@ for md in model_list:
         print('Dice value: ',str(final_dice))
         dice_dict[md]=final_dice
 final_model = max(dice_dict, key=dice_dict.get) 
-final_dice=dice_dict[final_model]
+final_dice_val=dice_dict[final_model]
 dice_dict_name='dice_dict.json'
 with open(dice_dict_name, 'w') as outfile:
     json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
 
 hpt = hypertune.HyperTune()
-hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice, global_step=0)
+hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1000)
 
 
 def save_model(job_dir, model_name,dice_dict):
