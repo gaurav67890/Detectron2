@@ -1,56 +1,66 @@
-<img src=".github/Detectron2-Logo-Horz.svg" width="300" >
+# Hyper-parameter tuning in GCP
 
-Detectron2 is Facebook AI Research's next generation software system
-that implements state-of-the-art object detection algorithms.
-It is a ground-up rewrite of the previous version,
-[Detectron](https://github.com/facebookresearch/Detectron/),
-and it originates from [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark/).
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/1381301/66535560-d3422200-eace-11e9-9123-5535d469db19.png"/>
-</div>
-
-### What's New
-* It is powered by the [PyTorch](https://pytorch.org) deep learning framework.
-* Includes more features such as panoptic segmentation, densepose, Cascade R-CNN, rotated bounding boxes, etc.
-* Can be used as a library to support [different projects](projects/) on top of it.
-  We'll open source more research projects in this way.
-* It [trains much faster](https://detectron2.readthedocs.io/notes/benchmarks.html).
-
-See our [blog post](https://ai.facebook.com/blog/-detectron2-a-pytorch-based-modular-object-detection-library-/)
-to see more demos and learn about detectron2.
-
-## Installation
-
-See [INSTALL.md](INSTALL.md).
-
-## Quick Start
-
-See [GETTING_STARTED.md](GETTING_STARTED.md),
-or the [Colab Notebook](https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5).
-
-Learn more at our [documentation](https://detectron2.readthedocs.org).
-And see [projects/](projects/) for some projects that are built on top of detectron2.
-
-## Model Zoo and Baselines
-
-We provide a large set of baseline results and trained models available for download in the [Detectron2 Model Zoo](MODEL_ZOO.md).
-
-
-## License
-
-Detectron2 is released under the [Apache 2.0 license](LICENSE).
-
-## Citing Detectron2
-
-If you use Detectron2 in your research or wish to refer to the baseline results published in the [Model Zoo](MODEL_ZOO.md), please use the following BibTeX entry.
-
-```BibTeX
-@misc{wu2019detectron2,
-  author =       {Yuxin Wu and Alexander Kirillov and Francisco Massa and
-                  Wan-Yen Lo and Ross Girshick},
-  title =        {Detectron2},
-  howpublished = {\url{https://github.com/facebookresearch/detectron2}},
-  year =         {2019}
-}
+### 1. Install google cloud and login https://cloud.google.com/sdk/docs
 ```
+gcloud auth login
+```
+
+### 2. If the above installaton shows error- gcloud not found, then run below commond
+```
+curl https://sdk.cloud.google.com | bash
+```
+
+### 3. Also it is important to configure your docker with gcloud, otherwise it will show permission error
+```
+gcloud auth configure-docker
+```
+
+### 4. Then we will create image, but before that we will export some values
+
+```
+#Make a new bucket for your project, and assign that name to BUCKET_NAME
+export BUCKET_NAME=hptuning2
+#Project id will be ai-project-231602
+export PROJECT_ID=ai-project-231602
+export JOB_DIR=gs://$BUCKET_NAME/hp_job_dir
+export IMAGE_REPO_NAME=scartch_tuning_container
+export IMAGE_TAG=scratch_tuning
+export IMAGE_URI=gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
+export REGION=us-west1
+export JOB_NAME=hp_tuning_scratch_container_job_$(date +%Y%m%d_%H%M%S)
+
+```
+
+### 5. git clone this code, in order to use the Dockerfile and hyper_tuning.config file
+#feat/AICAR-325-hyperparameter-tuning-scratch branch
+```
+git clone https://github.com/gaurav67890/Detectron2 detectron2_repo -b feat/AICAR-325-hyperparameter-tuning-scratch
+```
+
+### 5. Create the image using the Dockerfile from the above code.
+```
+docker build --no-cache --build-arg USER_ID=$UID -f Dockerfile -t $IMAGE_URI ./
+```
+
+### 5. Get the image id for the above image, and use it to push the docker image to gcp
+```
+docker tag image_ID $IMAGE_URI
+docker push $IMAGE_URI
+
+```
+
+### 6. We are almost done, now we just need to run this below command and start the gcp training
+```
+gcloud ai-platform jobs submit training $JOB_NAME --job-dir $JOB_DIR --region $REGION --master-image-uri $IMAGE_URI --config hyper_tuning.yaml
+```
+### 7. See the status of job using
+```
+gcloud ai-platform jobs describe hp_tuning_scratch_container_job_20200819_204006
+
+#this will generate the url for the job status and log which you can click. 
+```
+### 8. Mission accomplished, Have fun tuning !
+
+![alt-text](https://github.com/gaurav67890/Detectron2/blob/feat/AICAR-325-hyperparameter-tuning-scratch/landscape-1467725698-leonardo-di-caprio-great-gatsby.gif)
+
+
