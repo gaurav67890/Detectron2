@@ -1,8 +1,6 @@
 # Hyper-parameter tuning in GCP
 
-
 ### Note: Just incase you are at master branch, switch to feat/AICAR-325-hyperparameter-tuning-scratch branch. For GCP training, all the required code is inside feat/AICAR-325-hyperparameter-tuning-scratch branch, not inside master.
-
 
 ### 1. Install google cloud and login https://cloud.google.com/sdk/docs
 ```
@@ -40,30 +38,35 @@ export JOB_NAME=hp_tuning_scratch_container_job_$(date +%Y%m%d_%H%M%S)
 ```
 git clone https://github.com/gaurav67890/Detectron2 detectron2_repo -b feat/AICAR-325-hyperparameter-tuning-scratch
 ```
+### 6. Take the credentials.json file and copy it inside above branch 
+```
+cd Detectron2
+cp /path/to/credentials.json ./
+```
 
-### 5. Create the image using the Dockerfile from the above code.
+### 7. Create the image using the Dockerfile from the above code.
 ```
 docker build --no-cache --build-arg USER_ID=$UID -f Dockerfile -t $IMAGE_URI ./
 ```
 
-### 5. Get the image id for the above image, and use it to push the docker image to gcp
+### 8. Get the image id for the above image, and use it to push the docker image to gcp
 ```
 docker tag image_ID $IMAGE_URI
 docker push $IMAGE_URI
 
 ```
 
-### 6. We are almost done, now we just need to run this below command and start the gcp training
+### 9. We are almost done, now we just need to run this below command and start the gcp training
 ```
 gcloud ai-platform jobs submit training $JOB_NAME --job-dir $JOB_DIR --region $REGION --master-image-uri $IMAGE_URI --config hyper_tuning.yaml
 ```
-### 7. See the status of job using
+### 10. See the status of job using
 ```
 gcloud ai-platform jobs describe hp_tuning_scratch_container_job_20200819_204006
 
 #this will generate the url for the job status and log which you can click. 
 ```
-### 8. Mission accomplished, Have fun tuning !
+### 11. Mission accomplished, Have fun tuning !
 
 ![alt-text](https://github.com/gaurav67890/Detectron2/blob/feat/AICAR-325-hyperparameter-tuning-scratch/landscape-1467725698-leonardo-di-caprio-great-gatsby.gif)
 
