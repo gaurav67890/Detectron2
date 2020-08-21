@@ -51,7 +51,10 @@ parser.add_argument('--check_period',  # Specified in the config file
     type=int,
     default=500,
     help='checkpoint period')
-
+parser.add_argument('--thresh_test',  # Specified in the config file
+    type=float,
+    default=0.4,
+    help='testing threshold')
 parser.add_argument(
     '--job-dir',  # Handled automatically by AI Platform
     help='GCS location to write checkpoints and export models',
@@ -142,7 +145,7 @@ trainer.train()
 
 
 #cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
 #evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
 cfg.DATASETS.TEST = (damage_name+"_test",)
 
