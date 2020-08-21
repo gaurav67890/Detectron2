@@ -39,6 +39,20 @@ from google.cloud import storage
 
 parser = argparse.ArgumentParser(description='Input parameters need to be Specified for hypertuning')
 parser.add_argument(
+    '--damage_name',  # Handled automatically by AI Platform
+    help='scratch,dent,crack etc',
+    required=True
+    )
+parser.add_argument('--max_iter',  # Specified in the config file
+    type=int,
+    default=6000,
+    help='maximum iteration')
+parser.add_argument('--check_period',  # Specified in the config file
+    type=int,
+    default=500,
+    help='checkpoint period')
+
+parser.add_argument(
     '--job-dir',  # Handled automatically by AI Platform
     help='GCS location to write checkpoints and export models',
     required=True
@@ -80,8 +94,9 @@ parser.add_argument('--NMS_THRESH',  # Specified in the config file
 if os.path.exists('output') and os.path.isdir('output'):
     shutil.rmtree('output')
 
-damage_name='crack'
 args = parser.parse_args()
+
+damage_name=args.damage_name
 
 train_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_train.json"
 val_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_validation.json"
@@ -100,9 +115,9 @@ cfg.DATASETS.TEST = (damage_name+"_val",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 8
-cfg.SOLVER.MAX_ITER = 600 
+cfg.SOLVER.MAX_ITER = args.max_iter 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
-cfg.SOLVER.CHECKPOINT_PERIOD = 50
+cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
 #cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
