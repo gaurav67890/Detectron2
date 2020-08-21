@@ -164,7 +164,6 @@ for md in model_list:
                         fill_pts = np.array([p2], np.int32)
                         cv2.fillPoly(mask, fill_pts, 1)
                 if np.unique(mask,return_counts=True)[1][1]/(w*h)>0.000:
-                    l=l+1
                     #cv2.imwrite(data['images'][i]['file_name'],mask)
                     img=cv2.imread(img_dir+data['images'][i]['file_name'])
                     #cv2.imwrite('im/original'+str(i)+'.png',img)
@@ -184,6 +183,7 @@ for md in model_list:
                         dice_score=0
                 #print(dice_score)
                     dice=dice+dice_score
+                    l=l+1
             except Exception as e:
                 print(str(e))
         final_dice=dice/l
