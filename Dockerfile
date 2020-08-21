@@ -50,4 +50,4 @@ WORKDIR /detectron2_repo
 #RUN unzip split_damages.zip
 #COPY split_damages .
 
-ENTRYPOINT ["python3","trainer-dice.py"]
+ENTRYPOINT ["python3","trainer-main.py"]
