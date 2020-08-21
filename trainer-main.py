@@ -19,7 +19,7 @@ import os, json, cv2, random
 import glob,shutil
 print(os.system('ls'))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
-os.system('gsutil cp gs://hptuning/split_damages.zip .')
+os.system('gsutil cp gs://hptuning2/split_damages.zip .')
 os.system('unzip split_damages.zip')
 from detectron2.data import build_detection_test_loader
 import matplotlib.pyplot as plt
