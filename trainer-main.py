@@ -155,6 +155,7 @@ except OSError:
     pass
 
 dice_dict={}
+dice=[]
 model_list=glob.glob('output/*.pth')
 for md in model_list:
     if 'model' in md:
