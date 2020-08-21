@@ -198,7 +198,7 @@ with open(dice_dict_name, 'w') as outfile:
     json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
 
 hpt = hypertune.HyperTune()
-hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1000)
+hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=0)
 
 
 def save_model(job_dir, model_name,dice_dict):
