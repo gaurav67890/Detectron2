@@ -50,4 +50,4 @@ WORKDIR /detectron2_repo
 #RUN unzip split_damages.zip
 #COPY split_damages .
 
-ENTRYPOINT ["python3","trainer-main.py","--damage_name","crack","--max_iter","2000","--check_period","400","--thresh_test","0.3"]
+ENTRYPOINT ["python3","trainer-main.py","--damage_name","dent","--max_iter","6000","--check_period","600","--thresh_test","0.4"]
