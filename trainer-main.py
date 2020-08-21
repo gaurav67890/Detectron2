@@ -162,8 +162,8 @@ for md in model_list:
         predictor = DefaultPredictor(cfg)
         with open(test_json) as f:
             data = json.load(f)
-        dice=0
-        l=0
+        dice=[]
+        #l=0
         for i in tqdm(range(len(data['images']))):
             try:
                 h=data['images'][i]['height']
@@ -197,11 +197,11 @@ for md in model_list:
                     else:
                         dice_score=0
                 #print(dice_score)
-                    dice=dice+dice_score
-                    l=l+1
+                    dice.append(dice_score)
+                    #l=l+1
             except Exception as e:
                 print(str(e))
-        final_dice=dice/l
+        final_dice=sum(dice)/len(dice)
 
         print('Model name: '+md)
         print('Dice value: ',str(final_dice))
@@ -213,7 +213,7 @@ with open(dice_dict_name, 'w') as outfile:
     json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
 
 hpt = hypertune.HyperTune()
-hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=0)
+hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1)
 
 
 def save_model(job_dir, model_name,dice_dict):
