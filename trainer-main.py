@@ -80,7 +80,7 @@ parser.add_argument('--NMS_THRESH',  # Specified in the config file
 if os.path.exists('output') and os.path.isdir('output'):
     shutil.rmtree('output')
 
-damage_name='dent'
+damage_name='crack'
 args = parser.parse_args()
 
 train_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_train.json"
@@ -100,9 +100,9 @@ cfg.DATASETS.TEST = (damage_name+"_val",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 8
-cfg.SOLVER.MAX_ITER = 6000 
+cfg.SOLVER.MAX_ITER = 600 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
-cfg.SOLVER.CHECKPOINT_PERIOD = 500
+cfg.SOLVER.CHECKPOINT_PERIOD = 50
 #cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
