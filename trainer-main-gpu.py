@@ -134,6 +134,11 @@ Run on multiple machines:
         default=1000,
         help='POST_NMS_TOPK_TEST (default: 1000)')
 
+    parser.add_argument('--NMS_THRESH',  # Specified in the config file
+        type=float,
+        default=0.7,
+        help='NMS_THRESH (default: 0.7)')
+
     return parser
 
 
