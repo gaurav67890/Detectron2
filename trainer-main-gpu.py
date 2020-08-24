@@ -232,7 +232,7 @@ def setup(args):
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
     #cfg.freeze()
-    #default_setup(cfg, args)
+    default_setup(cfg, args)
     return cfg
 
 
@@ -335,7 +335,7 @@ def convert_cfg(args):
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    #cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
     cfg.SOLVER.IMS_PER_BATCH = 8
     cfg.SOLVER.MAX_ITER = args.max_iter 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
@@ -388,6 +388,7 @@ def main(args):
 
 
 if __name__ == "__main__":
+    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
