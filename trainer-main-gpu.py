@@ -102,8 +102,8 @@ Run on multiple machines:
         help='testing threshold')
     parser.add_argument(
         '--job-dir',  # Handled automatically by AI Platform
-        help='GCS location to write checkpoints and export models',
-        required=True
+        help='GCS location to write checkpoints and export models'
+        #required=True
         )
     parser.add_argument(
         '--lr', default=0.00025, 
@@ -222,7 +222,7 @@ def setup(args):
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     #cfg.freeze()
-    default_setup(cfg, args)
+    #default_setup(cfg, args)
     return cfg
 
 
