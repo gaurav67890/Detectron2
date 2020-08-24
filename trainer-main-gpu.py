@@ -321,11 +321,11 @@ def convert_cfg(args):
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
-    cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))    
+    #cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))    
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+    #cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
     cfg.SOLVER.IMS_PER_BATCH = 8
     cfg.SOLVER.MAX_ITER = args.max_iter 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
