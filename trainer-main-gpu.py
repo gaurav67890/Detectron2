@@ -388,7 +388,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+    os.makedirs('output', exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
