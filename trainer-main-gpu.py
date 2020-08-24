@@ -209,7 +209,7 @@ def setup(args):
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
-    cfg.freeze()
+    #cfg.freeze()
     default_setup(cfg, args)
     return cfg
 
