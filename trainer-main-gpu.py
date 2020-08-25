@@ -261,6 +261,7 @@ def save_model(job_dir, model_name,dice_dict):
     blob.upload_from_filename(dice_dict)
 
 def dice_calc():
+    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
     dice_dict={}
     dice=[]
     model_list=glob.glob('output/*.pth')
@@ -398,6 +399,7 @@ if __name__ == "__main__":
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
+    cfg=convert_cfg(args)
     launch(
         main,
         args.num_gpus,
@@ -407,7 +409,7 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    cfg=convert_cfg(args)
+    #cfg=convert_cfg(args)
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
 
