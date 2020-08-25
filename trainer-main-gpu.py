@@ -260,7 +260,7 @@ def save_model(job_dir, model_name,dice_dict):
         dice_dict))
     blob.upload_from_filename(dice_dict)
 
-def dice_calc():
+def dice_calc(damage_name,cfg):
     test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
     dice_dict={}
     dice=[]
@@ -417,7 +417,7 @@ if __name__ == "__main__":
         os.remove('output/last_checkpoint')
     except OSError:
         pass
-    final_model,final_dice_val=dice_calc()
+    final_model,final_dice_val=dice_calc(args.damage_name,cfg)
     dice_dict_name='dice_dict.json'
     with open(dice_dict_name, 'w') as outfile:
         json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
