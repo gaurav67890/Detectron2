@@ -1,3 +1,4 @@
+
 import logging
 import json
 import glob,shutil
@@ -228,7 +229,7 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    file_cfg='../configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
+    file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
     cfg.merge_from_file(file_cfg)
     #cfg.merge_from_list(args.opts)
     #cfg.freeze()
@@ -335,7 +336,7 @@ def convert_cfg(args):
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("../configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
     cfg.SOLVER.IMS_PER_BATCH = 8
     cfg.SOLVER.MAX_ITER = args.max_iter 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
