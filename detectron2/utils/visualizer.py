@@ -13,7 +13,7 @@ import torch
 from fvcore.common.file_io import PathManager
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from PIL import Image
-import PIL
+#import PIL
 Image.MAX_IMAGE_PIXELS = 933120000
 
 from detectron2.data import MetadataCatalog

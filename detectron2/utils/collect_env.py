@@ -7,9 +7,10 @@ import subprocess
 import sys
 from collections import defaultdict
 import PIL
+from PIL import Image
 Image.MAX_IMAGE_PIXELS = 933120000
 
-import PIL
+#import PIL
 import torch
 import torchvision
 from tabulate import tabulate

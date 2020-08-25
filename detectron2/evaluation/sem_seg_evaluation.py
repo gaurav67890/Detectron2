@@ -6,9 +6,10 @@ import numpy as np
 import os
 from collections import OrderedDict
 import PIL
-Image.MAX_IMAGE_PIXELS = 933120000
+#Image.MAX_IMAGE_PIXELS = 933120000
 
 import PIL.Image as Image
+Image.MAX_IMAGE_PIXELS = 933120000
 import pycocotools.mask as mask_util
 import torch
 from fvcore.common.file_io import PathManager

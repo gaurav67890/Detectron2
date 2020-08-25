@@ -13,9 +13,10 @@ from fvcore.transforms.transform import (
     TransformList,
 )
 import PIL
+from PIL import Image
 Image.MAX_IMAGE_PIXELS = 933120000
 
-from PIL import Image
+#from PIL import Image
 
 try:
     import cv2  # noqa

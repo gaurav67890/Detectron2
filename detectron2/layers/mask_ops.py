@@ -2,9 +2,10 @@
 import numpy as np
 import torch
 import PIL
+from PIL import Image
 Image.MAX_IMAGE_PIXELS = 933120000
 
-from PIL import Image
+#from PIL import Image
 from torch.nn import functional as F
 
 __all__ = ["paste_masks_in_image"]
