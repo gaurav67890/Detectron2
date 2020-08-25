@@ -12,6 +12,10 @@ from google.cloud import storage
 from pycocotools import coco
 from detectron2 import model_zoo
 import os
+print(os.system('ls'))
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
+os.system('gsutil cp gs://hptuning2/split_damages.zip .')
+os.system('unzip split_damages.zip')
 from collections import OrderedDict
 import torch
 from detectron2.data.datasets import register_coco_instances
@@ -134,6 +138,11 @@ Run on multiple machines:
         default=1000,
         help='POST_NMS_TOPK_TEST (default: 1000)')
 
+    parser.add_argument('--NMS_THRESH',  # Specified in the config file
+        type=float,
+        default=0.7,
+        help='NMS_THRESH (default: 0.7)')
+
     return parser
 
 
@@ -219,10 +228,11 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    cfg.merge_from_file(args.config_file)
+    file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
+    cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
     #cfg.freeze()
-    #default_setup(cfg, args)
+    default_setup(cfg, args)
     return cfg
 
 
@@ -325,7 +335,7 @@ def convert_cfg(args):
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    #cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
     cfg.SOLVER.IMS_PER_BATCH = 8
     cfg.SOLVER.MAX_ITER = args.max_iter 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
@@ -378,6 +388,8 @@ def main(args):
 
 
 if __name__ == "__main__":
+    os.makedirs('output', exist_ok=True)
+    print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
     launch(
