@@ -5,6 +5,9 @@ import logging
 import numpy as np
 import os
 from collections import OrderedDict
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
+
 import PIL.Image as Image
 import pycocotools.mask as mask_util
 import torch

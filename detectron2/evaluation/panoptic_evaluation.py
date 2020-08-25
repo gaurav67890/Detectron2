@@ -10,6 +10,8 @@ from collections import OrderedDict
 from fvcore.common.file_io import PathManager
 from PIL import Image
 from tabulate import tabulate
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
 
 from detectron2.data import MetadataCatalog
 from detectron2.utils import comm

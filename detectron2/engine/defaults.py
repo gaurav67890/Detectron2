@@ -18,6 +18,8 @@ import torch
 from fvcore.common.file_io import PathManager
 from fvcore.nn.precise_bn import get_bn_modules
 from torch.nn.parallel import DistributedDataParallel
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
 
 import detectron2.data.transforms as T
 from detectron2.checkpoint import DetectionCheckpointer

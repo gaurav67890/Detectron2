@@ -12,6 +12,9 @@ from fvcore.transforms.transform import (
     Transform,
     TransformList,
 )
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
+
 from PIL import Image
 
 try:

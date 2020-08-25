@@ -8,6 +8,9 @@ import os
 from itertools import chain
 import pycocotools.mask as mask_util
 from fvcore.common.file_io import PathManager
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
+
 from PIL import Image
 
 from detectron2.structures import BoxMode

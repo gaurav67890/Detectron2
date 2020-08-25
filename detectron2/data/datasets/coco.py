@@ -9,6 +9,8 @@ import os
 import pycocotools.mask as mask_util
 from fvcore.common.file_io import PathManager, file_lock
 from fvcore.common.timer import Timer
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
 from PIL import Image
 
 from detectron2.structures import Boxes, BoxMode, PolygonMasks

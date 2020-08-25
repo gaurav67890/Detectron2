@@ -5,6 +5,9 @@ import logging
 import numpy as np
 import unittest
 from unittest import mock
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
+
 from PIL import Image, ImageOps
 
 from detectron2.config import get_cfg

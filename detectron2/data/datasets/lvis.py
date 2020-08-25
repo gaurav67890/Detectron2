@@ -3,6 +3,8 @@ import logging
 import os
 from fvcore.common.file_io import PathManager
 from fvcore.common.timer import Timer
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
 
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.structures import BoxMode

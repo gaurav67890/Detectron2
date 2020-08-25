@@ -1,6 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import numpy as np
 import torch
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
+
 from PIL import Image
 from torch.nn import functional as F
 

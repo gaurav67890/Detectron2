@@ -13,6 +13,9 @@ from fvcore.transforms.transform import (
     Transform,
     VFlipTransform,
 )
+import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
+
 from PIL import Image
 
 from .augmentation import Augmentation
