@@ -5,6 +5,7 @@ from tqdm import tqdm
 import torch
 import sys
 import PIL
+Image.MAX_IMAGE_PIXELS = 933120000
 import argparse
 import hypertune
 import detectron2
