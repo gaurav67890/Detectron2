@@ -230,7 +230,7 @@ def setup(args):
     cfg = get_cfg()
     file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
     cfg.merge_from_file(file_cfg)
-    cfg.merge_from_list(args.opts)
+    #cfg.merge_from_list(args.opts)
     #cfg.freeze()
     default_setup(cfg, args)
     return cfg
