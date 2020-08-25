@@ -406,7 +406,7 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    cfg=convert_cfg(cfg)
+    cfg=convert_cfg(args)
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
 
