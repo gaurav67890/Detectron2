@@ -16,8 +16,8 @@ from detectron2 import model_zoo
 import os
 print(os.system('ls'))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
-os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-os.system('unzip split_damages.zip')
+#os.system('gsutil cp gs://hptuning2/split_damages.zip .')
+#os.system('unzip split_damages.zip')
 from collections import OrderedDict
 import torch
 from detectron2.data.datasets import register_coco_instances
@@ -390,6 +390,9 @@ def main(args):
 
 
 if __name__ == "__main__":
+    os.system('gsutil cp gs://hptuning2/split_damages.zip .')
+    os.system('unzip split_damages.zip')
+
     os.makedirs('output', exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
