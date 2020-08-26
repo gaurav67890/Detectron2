@@ -11,7 +11,7 @@ trainingInput:
       - parameterName: lr
         type: DOUBLE
         minValue: 0.00025
-        maxValue: 0.001
+        maxValue: 0.004
         scaleType: UNIT_LINEAR_SCALE
 
       - parameterName: MOMENTUM
