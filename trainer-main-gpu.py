@@ -264,6 +264,7 @@ def save_model(job_dir, model_name,dice_dict):
 
 def dice_calc(damage_name,cfg):
     test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
+    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
     dice_dict={}
     dice=[]
     model_list=glob.glob('output/*.pth')
