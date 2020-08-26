@@ -323,7 +323,7 @@ def dice_calc(damage_name,cfg):
             dice_dict[md]=final_dice
     final_model = max(dice_dict, key=dice_dict.get) 
     final_dice_val=dice_dict[final_model]
-    return final_model,final_dice_val
+    return final_model,final_dice_val,dice_dict
 
 def convert_cfg(args):
     cfg = setup(args)
@@ -420,7 +420,7 @@ if __name__ == "__main__":
         os.remove('output/last_checkpoint')
     except OSError:
         pass
-    final_model,final_dice_val=dice_calc(args.damage_name,cfg)
+    final_model,final_dice_val,dice_dict=dice_calc(args.damage_name,cfg)
     dice_dict_name='dice_dict.json'
     with open(dice_dict_name, 'w') as outfile:
         json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
