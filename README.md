@@ -47,6 +47,11 @@ cp /path/to/credentials.json ./
 ### 7. Create the image using the Dockerfile from the above code.
 ```
 docker build --no-cache --build-arg USER_ID=$UID -f Dockerfile -t $IMAGE_URI ./
+
+Note: Make changes inside the last line of Dockerfile(ENTRYPOINT) according to your requirements.
+
+1.trainer-main.py is for single gpu
+2.trainer-main-gpu.py is for multiple gpus
 ```
 
 ### 8. Get the image id for the above image, and use it to push the docker image to gcp
