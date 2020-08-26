@@ -101,6 +101,10 @@ Run on multiple machines:
         type=int,
         default=6000,
         help='maximum iteration')
+    parser.add_argument('--batch_size',  # Specified in the config file
+        type=int,
+        default=16,
+        help='batch_size')
     parser.add_argument('--check_period',  # Specified in the config file
         type=int,
         default=500,
@@ -343,7 +347,7 @@ def convert_cfg(args):
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
-    cfg.SOLVER.IMS_PER_BATCH = 8
+    cfg.SOLVER.IMS_PER_BATCH = args.batch_size
     cfg.SOLVER.MAX_ITER = args.max_iter 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
     cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
