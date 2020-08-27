@@ -337,7 +337,7 @@ def convert_cfg(args):
     val_json="/detectron2_repo/dent/validation_total.json"
     test_json="/detectron2_repo/dent/test_total.json"
 
-    img_dir=""/detectron2_repo/dent/images/"
+    img_dir="/detectron2_repo/dent/images/"
     register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
