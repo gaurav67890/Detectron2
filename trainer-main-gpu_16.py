@@ -267,8 +267,8 @@ def save_model(job_dir, model_name,dice_dict):
     blob.upload_from_filename(dice_dict)
 
 def dice_calc(damage_name,cfg):
-    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
-    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
+    test_json="/detectron2_repo/dent/test_total.json"
+    img_dir="/detectron2_repo/dent/images/"
     dice_dict={}
     dice=[]
     model_list=glob.glob('output/*.pth')
@@ -333,11 +333,11 @@ def convert_cfg(args):
     cfg = setup(args)
     damage_name=args.damage_name
 
-    train_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_train.json"
-    val_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_validation.json"
-    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
+    train_json="/detectron2_repo/dent/train_total_aug.json"
+    val_json="/detectron2_repo/dent/validation_total.json"
+    test_json="/detectron2_repo/dent/test_total.json"
 
-    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
+    img_dir=""/detectron2_repo/dent/images/"
     register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
@@ -399,8 +399,8 @@ def main(args):
 
 
 if __name__ == "__main__":
-    os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-    os.system('unzip split_damages.zip')
+    os.system('gsutil cp gs://hptuning2/dent_aug.zip .')
+    os.system('unzip dent_aug.zip')
 
     os.makedirs('output', exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
