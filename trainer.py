@@ -34,11 +34,11 @@ parser.add_argument('--lr', default=0.001, type=float, help='Learning rate param
 args = parser.parse_args()
 lr = args.lr
 
-train_json="/detectron2_repo/datasets/coco/scratch/annotations/instances_train.json"
-val_json="/detectron2_repo/datasets/coco/scratch/annotations/instances_validation.json"
-test_json="/detectron2_repo/datasets/coco/scratch/annotations/instances_test.json"
+train_json="/dev/shm/split_damages/datasets/coco/scratch/annotations/instances_train.json"
+val_json="/dev/shm/split_damages/datasets/coco/scratch/annotations/instances_validation.json"
+test_json="/dev/shm/split_damages/datasets/coco/scratch/annotations/instances_test.json"
 
-img_dir="/detectron2_repo/datasets/coco/images/"
+img_dir="/dev/shm/split_damages/datasets/coco/images/"
 register_coco_instances("scratch_train", {}, train_json, img_dir)
 register_coco_instances("scratch_val", {}, val_json, img_dir)
 register_coco_instances("scratch_test", {}, val_json, img_dir)
