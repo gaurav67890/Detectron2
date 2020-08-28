@@ -51,5 +51,5 @@ WORKDIR /detectron2_repo
 #COPY split_damages .
 
 #ENTRYPOINT ["python3","trainer-main.py","--damage_name","crack","--max_iter","2400","--check_period","600","--thresh_test","0.3"]
-ENTRYPOINT ["python3","trainer-main-gpu_16.py","--damage_name","dent","--max_iter","5000","--check_period","500","--thresh_test","0.4","--num-gpus","4","--config-file","configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml","--batch_size","16"]
+ENTRYPOINT ["python3","trainer-main-gpu.py","--damage_name","dent","--max_iter","5000","--check_period","500","--thresh_test","0.4","--num-gpus","4","--config-file","configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml","--batch_size","16"]
 
