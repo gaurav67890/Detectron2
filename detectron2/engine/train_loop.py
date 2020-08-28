@@ -226,7 +226,7 @@ class SimpleTrainer(TrainerBase):
         """
         loss_dict = self.model(data)
         self.gpa=self.gpa+1
-        print(os.system)
+        print(os.system('ls'))
         loss_dict_new={} 
         for keys in loss_dict: 
             loss_dict_new[keys] = loss_dict[keys].item()
@@ -234,8 +234,8 @@ class SimpleTrainer(TrainerBase):
         if self.gpa%20==0:
             json_path='trainloss.json'
             if os.path.exists(json_path):
-                with open(json_path) as f:
-                    loss_data = json.load(f)
+                with open(json_path,'r') as f:
+                    loss_data = json.loads(f.read())
                 for i in loss_data.keys():
                     loss_data[i].append(loss_dict_new[i])
                 with open(json_path, 'w') as outfile:
