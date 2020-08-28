@@ -32,7 +32,7 @@ RUN pip install --user torch==1.5 torchvision==0.6 -f https://download.pytorch.o
 RUN pip install pandas google-cloud-storage cloudml-hypertune
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
-RUN git clone https://github.com/gaurav67890/Detectron2 detectron2_repo -b feat/AICAR-517-training-loss-plot
+RUN git clone https://github.com/gaurav67890/Detectron2 detectron2_repo -b feat/AICAR-523-validation-loss-plot
 	
 ENV FORCE_CUDA="1"
 
