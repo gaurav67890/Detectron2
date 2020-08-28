@@ -22,12 +22,13 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
 #os.system('gsutil cp gs://hptuning2/split_damages.zip .')
 #os.system('unzip split_damages.zip')
 from collections import OrderedDict
+from detectron2.engine import HookBase
 import torch
-from detectron2.data.datasets import register_coco_instances
+from detectron2.data.datasets import register_coco_instances,
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
-from detectron2.data import MetadataCatalog
+from detectron2.data import MetadataCatalog,build_detection_train_loader
 from detectron2.engine import DefaultTrainer, default_setup, hooks, launch
 from detectron2.engine import DefaultPredictor
 from detectron2.evaluation import (
@@ -376,6 +377,51 @@ def convert_cfg(args):
 
     return cfg
 
+class ValidationLoss(HookBase):
+    def __init__(self, cfg):
+        super().__init__()
+        self.gpa_val=0
+        self.cfg = cfg.clone()
+        self.cfg.DATASETS.TRAIN = cfg.DATASETS.VAL
+        self._loader = iter(build_detection_train_loader(self.cfg))
+        
+    def after_step(self):
+        data = next(self._loader)
+        with torch.no_grad():
+            loss_dict = self.trainer.model(data)
+
+        self.gpa_val=self.gpa_val+1
+        loss_dict_new={} 
+        for keys in loss_dict: 
+            loss_dict_new[keys] = loss_dict[keys].item()
+
+        if self.gpa_val%20==0:
+            json_path='valloss.json'
+            if os.path.exists(json_path):
+                with open(json_path) as f:
+                    loss_data = json.load(f)
+                for i in loss_data.keys():
+                    loss_data[i].append(loss_dict_new[i])
+                with open(json_path, 'w') as outfile:
+                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
+            else:
+                loss_data={}
+                for i in loss_dict_new.keys():
+                    loss_data[i]=[loss_dict_new[i]]
+                with open(json_path, 'w') as outfile:
+                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
+
+            losses = sum(loss_dict.values())
+            assert torch.isfinite(losses).all(), loss_dict
+
+            loss_dict_reduced = {"val_" + k: v.item() for k, v in 
+                                 comm.reduce_dict(loss_dict).items()}
+            losses_reduced = sum(loss for loss in loss_dict_reduced.values())
+            if comm.is_main_process():
+                self.trainer.storage.put_scalars(total_val_loss=losses_reduced, 
+                                                 **loss_dict_reduced)
+
+
 def main(args):
     cfg = convert_cfg(args)
 
@@ -410,6 +456,14 @@ if __name__ == "__main__":
     os.system('unzip split_damages.zip')
 
     os.makedirs('output', exist_ok=True)
+    try:
+        os.remove('trainloss.json')
+    except OSError:
+        pass
+    try:
+        os.remove('valloss.json')
+    except OSError:
+        pass
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
@@ -423,25 +477,26 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    plotpath='plot'
+    plotpath='plot/'
     if os.path.exists(plotpath) and os.path.isdir(plotpath):
         shutil.rmtree(plotpath)
     os.mkdir(plotpath) 
 
-    json_file='trainloss.json'
-    with open(json_file) as f:
-        loss_data = json.load(f)
+    for mode in ['train','val']:
+        json_file=mode+'loss.json'
+        with open(json_file) as f:
+            loss_data = json.load(f)
 
-    iter_list=list(range(1,len(loss_data['loss_cls'])+1))
-    iter_list=[x * 20 for x in iter_list]
+        iter_list=list(range(1,len(loss_data['loss_cls'])+1))
+        iter_list=[x * 20 for x in iter_list]
 
-    for i in list(loss_data.keys()):
-        plt.plot(iter_list, loss_data[i])
-        plt.title(i+' Vs Iterations')
-        plt.xlabel('Iterations')
-        plt.ylabel(i)
-        plt.savefig('plot/'+i+'.png')
-        plt.close()
+        for i in list(loss_data.keys()):
+            plt.plot(iter_list, loss_data[i])
+            plt.title(i+' Vs Iterations')
+            plt.xlabel('Iterations')
+            plt.ylabel(i)
+            plt.savefig(plotpath+mode+'_'+i+'.png')
+            plt.close()
 
     #cfg=convert_cfg(args)
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
