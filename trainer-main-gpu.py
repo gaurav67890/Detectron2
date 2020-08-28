@@ -4,6 +4,7 @@ import numpy as np
 import glob,shutil
 from tqdm import tqdm
 import torch
+import matplotlib.pyplot as plt
 import sys
 import cv2
 import PIL
@@ -246,7 +247,7 @@ def setup(args):
 
 
 
-def save_model(job_dir, model_name,dice_dict):
+def save_model(job_dir, model_name,dice_dict_name,plot_path):
     """Saves the model to Google Cloud Storage"""
     # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
     job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
@@ -255,16 +256,22 @@ def save_model(job_dir, model_name,dice_dict):
     # Get the path. Example: 'hptuning_sonar/1'
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
 
-    # Upload the model to GCS
-    bucket = storage.Client().bucket(bucket_id)
-    blob = bucket.blob('{}/{}'.format(
-        bucket_path,
-        model_name[model_name.rfind('/')+1:]))
-    blob.upload_from_filename(model_name)
-    blob= bucket.blob('{}/{}'.format(
-        bucket_path,
-        dice_dict))
-    blob.upload_from_filename(dice_dict)
+    # Upload the data to GCS
+    plot_names=glob.glob('plot/*.png')
+    all_files=[plot_names,model_name,dice_dict_name]
+
+    for f in all_files:
+        bucket = storage.Client().bucket(bucket_id)
+        if f==model_name:
+            blob = bucket.blob('{}/{}'.format(
+                bucket_path,
+                f[f.rfind('/')+1:]))
+        else:
+            blob= bucket.blob('{}/{}'.format(
+                bucket_path,
+                f))
+        blob.upload_from_filename(f)
+
 
 def dice_calc(damage_name,cfg):
     test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
@@ -416,6 +423,26 @@ if __name__ == "__main__":
         args=(args,),
     )
 
+    plotpath='plot'
+    if os.path.exists(plotpath) and os.path.isdir(plotpath):
+        shutil.rmtree(plotpath)
+    os.mkdir(plotpath) 
+
+    json_file='trainloss.json'
+    with open(json_file) as f:
+        loss_data = json.load(f)
+
+    iter_list=list(range(1,len(loss_data['loss_cls'])+1))
+    iter_list=[x * 20 for x in iter_list]
+
+    for i in list(loss_data.keys()):
+        plt.plot(iter_list, loss_data[i])
+        plt.title(i+' Vs Iterations')
+        plt.xlabel('Iterations')
+        plt.ylabel(i)
+        plt.savefig('plot/'+i+'.png')
+        plt.close()
+
     #cfg=convert_cfg(args)
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
@@ -432,5 +459,4 @@ if __name__ == "__main__":
     hpt = hypertune.HyperTune()
     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1)
 
-
-    save_model(args.job_dir,final_model,dice_dict_name)
+    save_model(args.job_dir,final_model,dice_dict_name,plot_path)
