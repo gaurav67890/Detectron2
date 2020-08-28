@@ -32,7 +32,7 @@ RUN pip install --user torch==1.5 torchvision==0.6 -f https://download.pytorch.o
 RUN pip install pandas google-cloud-storage cloudml-hypertune
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
-RUN git clone https://github.com/gaurav67890/Detectron2 detectron2_repo -b feat/AICAR-325-hyperparameter-tuning-scratch
+RUN git clone https://github.com/gaurav67890/Detectron2 detectron2_repo -b feat/AICAR-517-training-loss-plot
 	
 ENV FORCE_CUDA="1"
 
@@ -51,5 +51,5 @@ WORKDIR /detectron2_repo
 #COPY split_damages .
 
 #ENTRYPOINT ["python3","trainer-main.py","--damage_name","crack","--max_iter","2400","--check_period","600","--thresh_test","0.3"]
-ENTRYPOINT ["python3","trainer-main-gpu.py","--damage_name","dent","--max_iter","5000","--check_period","500","--thresh_test","0.4","--num-gpus","4","--config-file","configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml","--batch_size","16"]
+ENTRYPOINT ["python3","trainer-main-gpu.py","--damage_name","dent","--max_iter","1000","--check_period","500","--thresh_test","0.4","--num-gpus","4","--config-file","configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml","--batch_size","8"]
 
