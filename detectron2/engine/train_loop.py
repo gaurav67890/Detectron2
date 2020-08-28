@@ -7,7 +7,8 @@ import numpy as np
 import time
 import weakref
 import torch
-
+import json
+import os
 import detectron2.utils.comm as comm
 from detectron2.utils.events import EventStorage
 
@@ -202,7 +203,7 @@ class SimpleTrainer(TrainerBase):
         like evaluation during training, you can overwrite its train() method.
         """
         model.train()
-
+        self.gpa=0
         self.model = model
         self.data_loader = data_loader
         self._data_loader_iter = iter(data_loader)
@@ -224,6 +225,27 @@ class SimpleTrainer(TrainerBase):
         If you want to do something with the losses, you can wrap the model.
         """
         loss_dict = self.model(data)
+        self.gpa=self.gpa+1
+        loss_dict_new={} 
+        for keys in loss_dict: 
+            loss_dict_new[keys] = loss_dict[keys].item()
+
+        if self.gpa%20==0:
+            json_path='trainloss.json'
+            if os.path.exists(json_path):
+                with open(json_path) as f:
+                    loss_data = json.load(f)
+                for i in loss_data.keys():
+                    loss_data[i].append(loss_dict_new[i])
+                with open(json_path, 'w') as outfile:
+                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
+            else:
+                loss_data={}
+                for i in loss_dict_new.keys():
+                    loss_data[i]=[loss_dict_new[i]]
+                with open(json_path, 'w') as outfile:
+                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
+
         losses = sum(loss_dict.values())
 
         """
