@@ -226,6 +226,7 @@ class SimpleTrainer(TrainerBase):
         """
         loss_dict = self.model(data)
         self.gpa=self.gpa+1
+        print(os.system)
         loss_dict_new={} 
         for keys in loss_dict: 
             loss_dict_new[keys] = loss_dict[keys].item()
