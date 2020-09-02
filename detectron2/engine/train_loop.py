@@ -249,7 +249,9 @@ class SimpleTrainer(TrainerBase):
                 a_file = open(json_path, "wb")
                 pickle.dump(loss_data, a_file)
                 a_file.close()
-'''
+        losses = sum(loss_dict.values())
+
+        '''
 
             if os.path.exists(json_path):
                 with open(json_path,'r') as f:
@@ -264,9 +266,8 @@ class SimpleTrainer(TrainerBase):
                     loss_data[i]=[loss_dict_new[i]]
                 with open(json_path, 'w') as outfile:
                     json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-'''
         losses = sum(loss_dict.values())
-
+        '''
         """
         If you need to accumulate gradients or do something similar, you can
         wrap the optimizer with your custom `zero_grad()` method.
