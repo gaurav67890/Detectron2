@@ -205,6 +205,7 @@ class SimpleTrainer(TrainerBase):
         """
         model.train()
         self.gpa=0
+        self.loss_data={}
         self.model = model
         self.data_loader = data_loader
         self._data_loader_iter = iter(data_loader)
@@ -228,32 +229,26 @@ class SimpleTrainer(TrainerBase):
         loss_dict = self.model(data)
         self.gpa=self.gpa+1
         print(os.system('ls'))
+        print('GPA' +str(self.gpa))
         loss_dict_new={} 
         for keys in loss_dict: 
             loss_dict_new[keys] = loss_dict[keys].item()
 
         if self.gpa%20==0:
-            json_path='trainloss.pkl'
-
-            if os.path.exists(json_path):
-                a_file1 = open(json_path, "rb")
-                loss_data = pickle.load(a_file1)
-                for i in loss_data.keys():
-                    loss_data[i].append(loss_dict_new[i])
-                a_file1.close()
-                a_file2 = open(json_path, "wb")
-                pickle.dump(loss_data, a_file2)
-                a_file2.close()
+            if len(self.loss_data)>0:
+                for i in self.loss_data.keys():
+                    self.loss_data[i].append(loss_dict_new[i])
             else:
-                loss_data={}
+                self.loss_data={}
                 for i in loss_dict_new.keys():
-                    loss_data[i]=[loss_dict_new[i]]
-                a_file3 = open(json_path, "wb")
-                pickle.dump(loss_data, a_file3)
-                a_file3.close()
+                    self.loss_data[i]=[loss_dict_new[i]]
         losses = sum(loss_dict.values())
-
+        json_path='trainloss.json'
+        with open(json_path, 'w') as outfile:
+            json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
         '''
+        if self.gpa%20==0:
+            json_path='trainloss.json'
 
             if os.path.exists(json_path):
                 with open(json_path,'r') as f:
