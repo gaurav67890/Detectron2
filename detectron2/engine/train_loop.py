@@ -236,21 +236,21 @@ class SimpleTrainer(TrainerBase):
             json_path='trainloss.pkl'
 
             if os.path.exists(json_path):
-                a_file = open(json_path, "rb")
-                loss_data = pickle.load(a_file)
+                a_file1 = open(json_path, "rb")
+                loss_data = pickle.load(a_file1)
                 for i in loss_data.keys():
                     loss_data[i].append(loss_dict_new[i])
-                a_file.close()
-                a_file = open(json_path, "wb")
-                pickle.dump(loss_data, a_file)
-                a_file.close()
+                a_file1.close()
+                a_file2 = open(json_path, "wb")
+                pickle.dump(loss_data, a_file2)
+                a_file2.close()
             else:
                 loss_data={}
                 for i in loss_dict_new.keys():
                     loss_data[i]=[loss_dict_new[i]]
-                a_file = open(json_path, "wb")
-                pickle.dump(loss_data, a_file)
-                a_file.close()
+                a_file3 = open(json_path, "wb")
+                pickle.dump(loss_data, a_file3)
+                a_file3.close()
         losses = sum(loss_dict.values())
 
         '''
