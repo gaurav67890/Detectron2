@@ -240,6 +240,8 @@ class SimpleTrainer(TrainerBase):
                 loss_data = pickle.load(a_file)
                 for i in loss_data.keys():
                     loss_data[i].append(loss_dict_new[i])
+                a_file.close()
+                a_file = open(json_path, "wb")
                 pickle.dump(loss_data, a_file)
                 a_file.close()
             else:
