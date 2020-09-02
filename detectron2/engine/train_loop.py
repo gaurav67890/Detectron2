@@ -245,7 +245,7 @@ class SimpleTrainer(TrainerBase):
         losses = sum(loss_dict.values())
         json_path='trainloss.json'
         with open(json_path, 'w') as outfile:
-            json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
+            json.dump(self.loss_data,outfile,indent=4,ensure_ascii = False)
         '''
         if self.gpa%20==0:
             json_path='trainloss.json'
