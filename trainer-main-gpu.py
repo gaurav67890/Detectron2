@@ -1,3 +1,4 @@
+import pickle
 import logging
 import json
 import numpy as np
@@ -428,10 +429,12 @@ if __name__ == "__main__":
         shutil.rmtree(plotpath)
     os.mkdir(plotpath) 
 
-    json_file='trainloss.json'
-    with open(json_file) as f:
-        loss_data = json.load(f)
-
+    json_file='trainloss.pkl'
+    #with open(json_file) as f:
+    #    loss_data = json.load(f)
+    a_file = open(json_file, "rb")
+    loss_data = pickle.load(a_file)
+    a_file.close()
     iter_list=list(range(1,len(loss_data['loss_cls'])+1))
     iter_list=[x * 20 for x in iter_list]
 

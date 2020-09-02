@@ -8,6 +8,7 @@ import time
 import weakref
 import torch
 import json
+import pickle
 import os
 import detectron2.utils.comm as comm
 from detectron2.utils.events import EventStorage
@@ -232,7 +233,24 @@ class SimpleTrainer(TrainerBase):
             loss_dict_new[keys] = loss_dict[keys].item()
 
         if self.gpa%20==0:
-            json_path='trainloss.json'
+            json_path='trainloss.pkl'
+
+            if os.path.exists(json_path):
+                a_file = open(json_path, "rb")
+                loss_data = pickle.load(a_file)
+                for i in loss_data.keys():
+                    loss_data[i].append(loss_dict_new[i])
+                pickle.dump(loss_data, a_file)
+                a_file.close()
+            else:
+                loss_data={}
+                for i in loss_dict_new.keys():
+                    loss_data[i]=[loss_dict_new[i]]
+                a_file = open(json_path, "wb")
+                pickle.dump(loss_data, a_file)
+                a_file.close()
+'''
+
             if os.path.exists(json_path):
                 with open(json_path,'r') as f:
                     loss_data = json.loads(f.read())
@@ -246,7 +264,7 @@ class SimpleTrainer(TrainerBase):
                     loss_data[i]=[loss_dict_new[i]]
                 with open(json_path, 'w') as outfile:
                     json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-
+'''
         losses = sum(loss_dict.values())
 
         """
