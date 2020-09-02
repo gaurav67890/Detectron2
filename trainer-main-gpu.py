@@ -248,7 +248,7 @@ def setup(args):
 
 
 
-def save_model(job_dir, model_name,dice_dict_name,plot_path):
+def save_model(job_dir, model_name,dice_dict_name,plotpath):
     """Saves the model to Google Cloud Storage"""
     # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
     job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
@@ -258,7 +258,7 @@ def save_model(job_dir, model_name,dice_dict_name,plot_path):
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
 
     # Upload the data to GCS
-    plot_names=glob.glob('plot/*.png')
+    plot_names=glob.glob(plotpath+'/*.png')
     all_files=[plot_names,model_name,dice_dict_name]
 
     for f in all_files:
@@ -462,4 +462,4 @@ if __name__ == "__main__":
     hpt = hypertune.HyperTune()
     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1)
 
-    save_model(args.job_dir,final_model,dice_dict_name,plot_path)
+    save_model(args.job_dir,final_model,dice_dict_name,plotpath)
