@@ -399,7 +399,7 @@ class ValidationLoss(HookBase):
             for keys in loss_dict: 
                 loss_dict_new[keys] = loss_dict[keys].item()
 
-            if self.gpa%20==0:
+            if self.gpa_val%20==0:
                 if len(self.loss_data)>0:
                     for i in self.loss_data.keys():
                         self.loss_data[i].append(loss_dict_new[i])
