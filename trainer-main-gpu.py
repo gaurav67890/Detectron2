@@ -259,9 +259,10 @@ def save_model(job_dir, model_name,dice_dict_name):
 
     # Upload the data to GCS
     plot_names=glob.glob('./*.png')
+    plot_names.extend([model_name,dice_dict_name])
     print('plot_names')
     print(plot_names)
-    all_files=[plot_names,model_name,dice_dict_name]
+    all_files=plot_names
 
     for f in all_files:
         bucket = storage.Client().bucket(bucket_id)
