@@ -24,7 +24,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
 from collections import OrderedDict
 from detectron2.engine import HookBase
 import torch
-from detectron2.data.datasets import register_coco_instances,
+from detectron2.data.datasets import register_coco_instances
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
@@ -248,7 +248,7 @@ def setup(args):
 
 
 
-def save_model(job_dir, model_name,dice_dict_name,plot_path):
+def save_model(job_dir, model_name,dice_dict_name):
     """Saves the model to Google Cloud Storage"""
     # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
     job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
@@ -258,8 +258,11 @@ def save_model(job_dir, model_name,dice_dict_name,plot_path):
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
 
     # Upload the data to GCS
-    plot_names=glob.glob('plot/*.png')
-    all_files=[plot_names,model_name,dice_dict_name]
+    plot_names=glob.glob('./*.png')
+    plot_names.extend([model_name,dice_dict_name])
+    print('plot_names')
+    print(plot_names)
+    all_files=plot_names
 
     for f in all_files:
         bucket = storage.Client().bucket(bucket_id)
@@ -381,37 +384,34 @@ class ValidationLoss(HookBase):
     def __init__(self, cfg):
         super().__init__()
         self.gpa_val=0
+        self.loss_data_val={}
         self.cfg = cfg.clone()
         self.cfg.DATASETS.TRAIN = cfg.DATASETS.VAL
         self._loader = iter(build_detection_train_loader(self.cfg))
         
     def after_step(self):
         data = next(self._loader)
+        self.gpa_val=self.gpa_val+1
         with torch.no_grad():
             loss_dict = self.trainer.model(data)
 
-        self.gpa_val=self.gpa_val+1
-        loss_dict_new={} 
-        for keys in loss_dict: 
-            loss_dict_new[keys] = loss_dict[keys].item()
+            loss_dict_new={} 
+            for keys in loss_dict: 
+                loss_dict_new[keys] = loss_dict[keys].item()
 
-        if self.gpa_val%20==0:
-            json_path='valloss.json'
-            if os.path.exists(json_path):
-                with open(json_path) as f:
-                    loss_data = json.load(f)
-                for i in loss_data.keys():
-                    loss_data[i].append(loss_dict_new[i])
-                with open(json_path, 'w') as outfile:
-                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-            else:
-                loss_data={}
-                for i in loss_dict_new.keys():
-                    loss_data[i]=[loss_dict_new[i]]
-                with open(json_path, 'w') as outfile:
-                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-
+            if self.gpa%20==0:
+                if len(self.loss_data)>0:
+                    for i in self.loss_data.keys():
+                        self.loss_data[i].append(loss_dict_new[i])
+                else:
+                    self.loss_data={}
+                    for i in loss_dict_new.keys():
+                        self.loss_data[i]=[loss_dict_new[i]]
             losses = sum(loss_dict.values())
+            json_path='valloss.json'
+            with open(json_path, 'w') as outfile:
+                json.dump(self.loss_data,outfile,indent=4,ensure_ascii = False)
+
             assert torch.isfinite(losses).all(), loss_dict
 
             loss_dict_reduced = {"val_" + k: v.item() for k, v in 
@@ -420,7 +420,6 @@ class ValidationLoss(HookBase):
             if comm.is_main_process():
                 self.trainer.storage.put_scalars(total_val_loss=losses_reduced, 
                                                  **loss_dict_reduced)
-
 
 def main(args):
     cfg = convert_cfg(args)
@@ -477,10 +476,10 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    plotpath='plot/'
-    if os.path.exists(plotpath) and os.path.isdir(plotpath):
-        shutil.rmtree(plotpath)
-    os.mkdir(plotpath) 
+    #plotpath='plot/'
+    #if os.path.exists(plotpath) and os.path.isdir(plotpath):
+    #    shutil.rmtree(plotpath)
+    #os.mkdir(plotpath) 
 
     for mode in ['train','val']:
         json_file=mode+'loss.json'
@@ -495,7 +494,7 @@ if __name__ == "__main__":
             plt.title(i+' Vs Iterations')
             plt.xlabel('Iterations')
             plt.ylabel(i)
-            plt.savefig(plotpath+mode+'_'+i+'.png')
+            plt.savefig(mode+'_'+i+'.png')
             plt.close()
 
     #cfg=convert_cfg(args)
@@ -514,4 +513,4 @@ if __name__ == "__main__":
     hpt = hypertune.HyperTune()
     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1)
 
-    save_model(args.job_dir,final_model,dice_dict_name,plot_path)
+    save_model(args.job_dir,final_model,dice_dict_name)

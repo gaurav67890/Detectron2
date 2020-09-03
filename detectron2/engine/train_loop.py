@@ -226,27 +226,25 @@ class SimpleTrainer(TrainerBase):
         """
         loss_dict = self.model(data)
         self.gpa=self.gpa+1
+        print(os.system('ls'))
+        print('GPA' +str(self.gpa))
         loss_dict_new={} 
         for keys in loss_dict: 
             loss_dict_new[keys] = loss_dict[keys].item()
 
         if self.gpa%20==0:
-            json_path='trainloss.json'
-            if os.path.exists(json_path):
-                with open(json_path) as f:
-                    loss_data = json.load(f)
-                for i in loss_data.keys():
-                    loss_data[i].append(loss_dict_new[i])
-                with open(json_path, 'w') as outfile:
-                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
+            if len(self.loss_data)>0:
+                for i in self.loss_data.keys():
+                    self.loss_data[i].append(loss_dict_new[i])
             else:
-                loss_data={}
+                self.loss_data={}
                 for i in loss_dict_new.keys():
-                    loss_data[i]=[loss_dict_new[i]]
-                with open(json_path, 'w') as outfile:
-                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-
+                    self.loss_data[i]=[loss_dict_new[i]]
         losses = sum(loss_dict.values())
+        json_path='trainloss.json'
+        with open(json_path, 'w') as outfile:
+            json.dump(self.loss_data,outfile,indent=4,ensure_ascii = False)
+
 
         """
         If you need to accumulate gradients or do something similar, you can
