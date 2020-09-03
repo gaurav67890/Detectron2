@@ -442,6 +442,9 @@ def main(args):
     subclassing the trainer.
     """
     trainer = Trainer(cfg)
+    val_loss = ValidationLoss(cfg)
+    trainer.register_hooks([val_loss])
+    trainer._hooks = trainer._hooks[:-2] + trainer._hooks[-2:][::-1]
     trainer.resume_or_load(resume=args.resume)
     if cfg.TEST.AUG.ENABLED:
         trainer.register_hooks(
