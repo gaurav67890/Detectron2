@@ -204,6 +204,7 @@ class SimpleTrainer(TrainerBase):
         """
         model.train()
         self.gpa=0
+        self.loss_data={}
         self.model = model
         self.data_loader = data_loader
         self._data_loader_iter = iter(data_loader)
