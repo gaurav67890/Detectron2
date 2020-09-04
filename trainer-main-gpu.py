@@ -401,17 +401,17 @@ class ValidationLoss(HookBase):
                 loss_dict_new[keys] = loss_dict[keys].item()
 
             if self.gpa_val%20==0:
-                if len(self.loss_data)>0:
-                    for i in self.loss_data.keys():
-                        self.loss_data[i].append(loss_dict_new[i])
+                if len(self.loss_data_val)>0:
+                    for i in self.loss_data_val.keys():
+                        self.loss_data_val[i].append(loss_dict_new[i])
                 else:
-                    self.loss_data={}
+                    self.loss_data_val={}
                     for i in loss_dict_new.keys():
-                        self.loss_data[i]=[loss_dict_new[i]]
+                        self.loss_data_val[i]=[loss_dict_new[i]]
             losses = sum(loss_dict.values())
             json_path='valloss.json'
             with open(json_path, 'w') as outfile:
-                json.dump(self.loss_data,outfile,indent=4,ensure_ascii = False)
+                json.dump(self.loss_data_val,outfile,indent=4,ensure_ascii = False)
 
             assert torch.isfinite(losses).all(), loss_dict
 
