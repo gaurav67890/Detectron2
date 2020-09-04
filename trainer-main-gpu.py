@@ -446,27 +446,27 @@ def main(args):
     val_loss = ValidationLoss(cfg)
     trainer.register_hooks([val_loss])
     trainer._hooks = trainer._hooks[:-2] + trainer._hooks[-2:][::-1]
-    trainer.resume_or_load(resume=args.resume)
-    if cfg.TEST.AUG.ENABLED:
-        trainer.register_hooks(
-            [hooks.EvalHook(0, lambda: trainer.test_with_TTA(cfg, trainer.model))]
-        )
+    trainer.resume_or_load(resume=False)
+    #if cfg.TEST.AUG.ENABLED:
+    #    trainer.register_hooks(
+    #        [hooks.EvalHook(0, lambda: trainer.test_with_TTA(cfg, trainer.model))]
+    #    )
     return trainer.train()
 
 
 if __name__ == "__main__":
     os.system('gsutil cp gs://hptuning2/split_damages.zip .')
     os.system('unzip split_damages.zip')
-
+    
     os.makedirs('output', exist_ok=True)
-    try:
-        os.remove('trainloss.json')
-    except OSError:
-        pass
-    try:
-        os.remove('valloss.json')
-    except OSError:
-        pass
+    #try:
+    #    os.remove('trainloss.json')
+    #except OSError:
+    #    pass
+    #try:
+    #    os.remove('valloss.json')
+    #except OSError:
+    #    pass
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
@@ -479,6 +479,7 @@ if __name__ == "__main__":
         dist_url=args.dist_url,
         args=(args,),
     )
+    print(os.system('ls'))
 
     #plotpath='plot/'
     #if os.path.exists(plotpath) and os.path.isdir(plotpath):
@@ -487,6 +488,7 @@ if __name__ == "__main__":
 
     for mode in ['train','val']:
         json_file=mode+'loss.json'
+        print(json_file)
         with open(json_file) as f:
             loss_data = json.load(f)
 
@@ -494,6 +496,8 @@ if __name__ == "__main__":
         iter_list=[x * 20 for x in iter_list]
 
         for i in list(loss_data.keys()):
+            print('key')
+            print(i)
             plt.plot(iter_list, loss_data[i])
             plt.title(i+' Vs Iterations')
             plt.xlabel('Iterations')
