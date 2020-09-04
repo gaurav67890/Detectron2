@@ -356,6 +356,7 @@ def convert_cfg(args):
     #cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))    
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
+    cfg.DATASETS.VAL = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
     cfg.SOLVER.IMS_PER_BATCH = args.batch_size
