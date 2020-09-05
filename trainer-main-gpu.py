@@ -215,7 +215,7 @@ class Trainer(DefaultTrainer):
         elif len(evaluator_list) == 1:
             return evaluator_list[0]
         return DatasetEvaluators(evaluator_list)
-
+    '''
     @classmethod
     def test_with_TTA(cls, cfg, model):
         logger = logging.getLogger("detectron2.trainer")
@@ -232,7 +232,7 @@ class Trainer(DefaultTrainer):
         res = cls.test(cfg, model, evaluators)
         res = OrderedDict({k + "_TTA": v for k, v in res.items()})
         return res
-
+    '''
 
 def setup(args):
     """
