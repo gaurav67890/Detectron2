@@ -173,7 +173,7 @@ class Trainer(DefaultTrainer):
         This uses the special metadata "evaluator_type" associated with each builtin dataset.
         For your own dataset, you can simply create an evaluator manually in your
         script and do not have to worry about the hacky if-else logic here.
-        """
+        
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
         evaluator_list = []
@@ -215,6 +215,8 @@ class Trainer(DefaultTrainer):
         elif len(evaluator_list) == 1:
             return evaluator_list[0]
         return DatasetEvaluators(evaluator_list)
+    """
+        print('evaulation removed')
     '''
     @classmethod
     def test_with_TTA(cls, cfg, model):
@@ -233,6 +235,7 @@ class Trainer(DefaultTrainer):
         res = OrderedDict({k + "_TTA": v for k, v in res.items()})
         return res
     '''
+
 
 def setup(args):
     """
@@ -442,7 +445,7 @@ def main(args):
     consider writing your own training loop (see plain_train_net.py) or
     subclassing the trainer.
     """
-    trainer = DefaultTrainer(cfg)
+    trainer = Trainer(cfg)
     val_loss = ValidationLoss(cfg)
     trainer.register_hooks([val_loss])
     trainer._hooks = trainer._hooks[:-2] + trainer._hooks[-2:][::-1]
