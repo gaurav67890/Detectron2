@@ -499,8 +499,7 @@ def do_train(cfg, model, resume=False):
 
 
 def main(args):
-    cfg = setup(args)
-
+    cfg = convert_cfg(args)
     model = build_model(cfg)
     logger.info("Model:\n{}".format(model))
 
