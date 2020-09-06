@@ -18,10 +18,7 @@ from google.cloud import storage
 from pycocotools import coco
 from detectron2 import model_zoo
 import os
-print(os.system('ls'))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
-#os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-#os.system('unzip split_damages.zip')
 from collections import OrderedDict
 import torch
 from detectron2.data.datasets import register_coco_instances
@@ -250,20 +247,12 @@ def setup(args):
 
 def save_model(job_dir, model_name,dice_dict_name):
     """Saves the model to Google Cloud Storage"""
-    # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
-    job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
-    # Get the Bucket Id
+    job_dir = job_dir.replace('gs://', '')  
     bucket_id = job_dir.split('/')[0]
-    # Get the path. Example: 'hptuning_sonar/1'
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
-
-    # Upload the data to GCS
     plot_names=glob.glob('./*.png')
     plot_names.extend([model_name,dice_dict_name])
-    print('plot_names')
-    print(plot_names)
     all_files=plot_names
-
     for f in all_files:
         bucket = storage.Client().bucket(bucket_id)
         if f==model_name:
@@ -285,7 +274,6 @@ def dice_calc(damage_name,cfg):
     model_list=glob.glob('output/*.pth')
     for md in model_list:
         if 'model' in md:
-        #print('Model name: '+i)
             if 'final' in md:
                 continue
             cfg.MODEL.WEIGHTS = md
@@ -293,7 +281,6 @@ def dice_calc(damage_name,cfg):
             with open(test_json) as f:
                 data = json.load(f)
             dice=[]
-            #l=0
             for i in tqdm(range(len(data['images']))):
                 try:
                     h=data['images'][i]['height']
@@ -309,30 +296,22 @@ def dice_calc(damage_name,cfg):
                             fill_pts = np.array([p2], np.int32)
                             cv2.fillPoly(mask, fill_pts, 1)
                     if np.unique(mask,return_counts=True)[1][1]/(w*h)>0.000:
-                    #cv2.imwrite(data['images'][i]['file_name'],mask)
                         img=cv2.imread(img_dir+data['images'][i]['file_name'])
-                    #cv2.imwrite('im/original'+str(i)+'.png',img)
-                    #cv2.imwrite('im/mask'+str(i)+'.png',mask*255)
                         out = predictor(img)
                         pred = torch.sum(out['instances'].pred_masks,dim=0) > 0
                         pred = pred.cpu().detach().numpy()
                         pred=pred.astype(int)
-                        #cv2.imwrite('im/pred'+str(i)+'.png',pred*255)
                         intersection = np.logical_and(mask, pred)
                         if len(np.unique(pred,return_counts=True)[1])>1:
                             ground=np.unique(mask,return_counts=True)[1][1]
                             pred_val=np.unique(pred,return_counts=True)[1][1]
                             dice_score = 2*np.sum(intersection) / (ground+pred_val)
-                #print(dice_score)
                         else:
                             dice_score=0
-                    #print(dice_score)
                         dice.append(dice_score)
-                        #l=l+1
                 except Exception as e:
                     print(str(e))
             final_dice=sum(dice)/len(dice)
-
             print('Model name: '+md)
             print('Dice value: ',str(final_dice))
             dice_dict[md]=final_dice
@@ -353,7 +332,6 @@ def convert_cfg(args):
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
-    #cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))    
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
@@ -427,17 +405,9 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    #plotpath='plot'
-    #if os.path.exists(plotpath) and os.path.isdir(plotpath):
-    #    shutil.rmtree(plotpath)
-    #os.mkdir(plotpath) 
-
     json_file='trainloss.json'
     with open(json_file) as f:
         loss_data = json.load(f)
-    #a_filem = open(json_file, "rb")
-    #loss_data = pickle.load(a_filem)
-    #a_filem.close()
     iter_list=list(range(1,len(loss_data['loss_cls'])+1))
     iter_list=[x * 20 for x in iter_list]
 
@@ -449,7 +419,6 @@ if __name__ == "__main__":
         plt.savefig(i+'.png')
         plt.close()
 
-    #cfg=convert_cfg(args)
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
 
