@@ -110,7 +110,6 @@ register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
 register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
-
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
 cfg.DATASETS.TRAIN = (damage_name+"_train",)
@@ -121,7 +120,6 @@ cfg.SOLVER.IMS_PER_BATCH = 8
 cfg.SOLVER.MAX_ITER = args.max_iter 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
 cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
-#cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
 cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
 cfg.MODEL.RPN.NMS_THRESH=args.NMS_THRESH
@@ -138,15 +136,11 @@ else:
 cfg.MODEL.ANCHOR_GENERATOR.SIZES=ANCHOR_SIZES
 
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-#trainer = CocoTrainer(cfg) 
 trainer = DefaultTrainer(cfg) 
 trainer.resume_or_load(resume=False)
 trainer.train()
 
-
-#cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
-#evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
 cfg.DATASETS.TEST = (damage_name+"_test",)
 
 try:
@@ -159,7 +153,6 @@ dice=[]
 model_list=glob.glob('output/*.pth')
 for md in model_list:
     if 'model' in md:
-        #print('Model name: '+i)
         if 'final' in md:
             continue
         cfg.MODEL.WEIGHTS = md
@@ -183,26 +176,19 @@ for md in model_list:
                         fill_pts = np.array([p2], np.int32)
                         cv2.fillPoly(mask, fill_pts, 1)
                 if np.unique(mask,return_counts=True)[1][1]/(w*h)>0.000:
-                    #cv2.imwrite(data['images'][i]['file_name'],mask)
                     img=cv2.imread(img_dir+data['images'][i]['file_name'])
-                    #cv2.imwrite('im/original'+str(i)+'.png',img)
-                    #cv2.imwrite('im/mask'+str(i)+'.png',mask*255)
                     out = predictor(img)
                     pred = torch.sum(out['instances'].pred_masks,dim=0) > 0
                     pred = pred.cpu().detach().numpy()
                     pred=pred.astype(int)
-                    #cv2.imwrite('im/pred'+str(i)+'.png',pred*255)
                     intersection = np.logical_and(mask, pred)
                     if len(np.unique(pred,return_counts=True)[1])>1:
                         ground=np.unique(mask,return_counts=True)[1][1]
                         pred_val=np.unique(pred,return_counts=True)[1][1]
                         dice_score = 2*np.sum(intersection) / (ground+pred_val)
-                #print(dice_score)
                     else:
                         dice_score=0
-                #print(dice_score)
                     dice.append(dice_score)
-                    #l=l+1
             except Exception as e:
                 print(str(e))
         final_dice=sum(dice)/len(dice)
@@ -222,13 +208,9 @@ hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric
 
 def save_model(job_dir, model_name,dice_dict):
     """Saves the model to Google Cloud Storage"""
-    # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
-    job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
-    # Get the Bucket Id
+    job_dir = job_dir.replace('gs://', '')
     bucket_id = job_dir.split('/')[0]
-    # Get the path. Example: 'hptuning_sonar/1'
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
-
     # Upload the model to GCS
     bucket = storage.Client().bucket(bucket_id)
     blob = bucket.blob('{}/{}'.format(
