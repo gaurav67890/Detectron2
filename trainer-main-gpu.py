@@ -1,11 +1,9 @@
-import pickle
 import logging
 import json
 import numpy as np
 import glob,shutil
 from tqdm import tqdm
 import torch
-import matplotlib.pyplot as plt
 import sys
 import cv2
 import PIL
@@ -18,7 +16,7 @@ from google.cloud import storage
 from pycocotools import coco
 from detectron2 import model_zoo
 import os
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
+import yaml
 from collections import OrderedDict
 import torch
 from detectron2.data.datasets import register_coco_instances
@@ -40,6 +38,10 @@ from detectron2.evaluation import (
     verify_results,
 )
 from detectron2.modeling import GeneralizedRCNNWithTTA
+
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=param_data['ENVIRON']['GOOGLE_APPLICATION_CREDENTIALS']
 
 
 def default_argument_parser(epilog=None):
@@ -154,7 +156,6 @@ Run on multiple machines:
     return parser
 
 
-
 class Trainer(DefaultTrainer):
     """
     We use the "DefaultTrainer" which contains pre-defined default logic for
@@ -239,7 +240,6 @@ def setup(args):
     file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
-    #cfg.freeze()
     default_setup(cfg, args)
     return cfg
 
@@ -267,11 +267,11 @@ def save_model(job_dir, model_name,dice_dict_name):
 
 
 def dice_calc(damage_name,cfg):
-    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
-    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
+    test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+    img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
     dice_dict={}
     dice=[]
-    model_list=glob.glob('output/*.pth')
+    model_list=glob.glob(param_data['MODEL']['OUT_PATH']+'/*.pth')
     for md in model_list:
         if 'model' in md:
             if 'final' in md:
@@ -323,11 +323,11 @@ def convert_cfg(args):
     cfg = setup(args)
     damage_name=args.damage_name
 
-    train_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_train.json"
-    val_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_validation.json"
-    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
+    train_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TRAIN_PATH']
+    val_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
+    test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
 
-    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
+    img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
     register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
@@ -335,14 +335,13 @@ def convert_cfg(args):
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
     cfg.SOLVER.IMS_PER_BATCH = args.batch_size
     cfg.SOLVER.MAX_ITER = args.max_iter 
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1 
     cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
-    #cfg.TEST.EVAL_PERIOD = 5000
     cfg.SOLVER.MOMENTUM=args.MOMENTUM
-    cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
+    cfg.SOLVER.BASE_LR = args.lr 
     cfg.MODEL.RPN.NMS_THRESH=args.NMS_THRESH
     cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=args.PRE_NMS_TOPK_TRAIN
     cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=args.PRE_NMS_TOPK_TEST
@@ -388,13 +387,15 @@ def main(args):
 
 
 if __name__ == "__main__":
-    os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-    os.system('unzip split_damages.zip')
+    MODE='AUGMENTED'
+    os.system('gsutil cp '+param_data['GOOGLE_STORAGE'][MODE]['BUCKET']+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE']+' .')
+    os.system('unzip '+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE'])
 
-    os.makedirs('output', exist_ok=True)
+    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
+    dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
     cfg=convert_cfg(args)
     launch(
         main,
@@ -405,7 +406,7 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    json_file='trainloss.json'
+    json_file=param_data['JSONS']['TRAIN_LOSS']
     with open(json_file) as f:
         loss_data = json.load(f)
     iter_list=list(range(1,len(loss_data['loss_cls'])+1))
@@ -423,11 +424,11 @@ if __name__ == "__main__":
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
 
     try:
-        os.remove('output/last_checkpoint')
+        os.remove(param_data['MODEL']['OUT_PATH']+'last_checkpoint')
     except OSError:
         pass
     final_model,final_dice_val,dice_dict=dice_calc(args.damage_name,cfg)
-    dice_dict_name='dice_dict.json'
+    dice_dict_name=param_data['JSONS']['DICE_DICT']
     with open(dice_dict_name, 'w') as outfile:
         json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
 

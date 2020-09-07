@@ -12,6 +12,9 @@ import pickle
 import os
 import detectron2.utils.comm as comm
 from detectron2.utils.events import EventStorage
+import yaml
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
 
 __all__ = ["HookBase", "TrainerBase", "SimpleTrainer"]
 
@@ -228,12 +231,9 @@ class SimpleTrainer(TrainerBase):
         """
         loss_dict = self.model(data)
         self.gpa=self.gpa+1
-        print(os.system('ls'))
-        print('GPA' +str(self.gpa))
         loss_dict_new={} 
         for keys in loss_dict: 
             loss_dict_new[keys] = loss_dict[keys].item()
-
         if self.gpa%20==0:
             if len(self.loss_data)>0:
                 for i in self.loss_data.keys():
@@ -243,28 +243,9 @@ class SimpleTrainer(TrainerBase):
                 for i in loss_dict_new.keys():
                     self.loss_data[i]=[loss_dict_new[i]]
         losses = sum(loss_dict.values())
-        json_path='trainloss.json'
+        json_path=param_data['JSONS']['TRAIN_LOSS']
         with open(json_path, 'w') as outfile:
             json.dump(self.loss_data,outfile,indent=4,ensure_ascii = False)
-        '''
-        if self.gpa%20==0:
-            json_path='trainloss.json'
-
-            if os.path.exists(json_path):
-                with open(json_path,'r') as f:
-                    loss_data = json.loads(f.read())
-                for i in loss_data.keys():
-                    loss_data[i].append(loss_dict_new[i])
-                with open(json_path, 'w') as outfile:
-                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-            else:
-                loss_data={}
-                for i in loss_dict_new.keys():
-                    loss_data[i]=[loss_dict_new[i]]
-                with open(json_path, 'w') as outfile:
-                    json.dump(loss_data,outfile,indent=4,ensure_ascii = False)
-        losses = sum(loss_dict.values())
-        '''
         """
         If you need to accumulate gradients or do something similar, you can
         wrap the optimizer with your custom `zero_grad()` method.
