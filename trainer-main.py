@@ -17,10 +17,12 @@ import urllib
 import numpy as np
 import os, json, cv2, random
 import glob,shutil
-print(os.system('ls'))
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
-os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-os.system('unzip split_damages.zip')
+import yaml
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=param_data['ENVIRON']['GOOGLE_APPLICATION_CREDENTIALS']
+os.system('gsutil cp '+param_data['GOOGLE_STORAGE']['ORIGINAL']['BUCKET']+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE']+' .')
+os.system('unzip '+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE'])
 from detectron2.data import build_detection_test_loader
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -101,22 +103,23 @@ args = parser.parse_args()
 
 damage_name=args.damage_name
 
-train_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_train.json"
-val_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_validation.json"
-test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
+dataset_dir=param_data['DATASET']['ORIGINAL']['DIR_PATH']
+train_json=dataset_dir+damage_name+param_data['DATASET']['ORIGINAL']['TRAIN_PATH']
+val_json=dataset_dir+damage_name+param_data['DATASET']['ORIGINAL']['VAL_PATH']
+test_json=dataset_dir+damage_name+param_data['DATASET']['ORIGINAL']['TEST_PATH']
 
-img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
+img_dir=dataset_dir+param_data['DATASET']['ORIGINAL']['IMAGES_PATH']
 register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
 register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
-
+model_config=param_data['MODEL']['CONFIG']
 cfg = get_cfg()
-cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
+cfg.merge_from_file(model_zoo.get_config_file(model_config))
 cfg.DATASETS.TRAIN = (damage_name+"_train",)
 cfg.DATASETS.TEST = (damage_name+"_val",)
 cfg.DATALOADER.NUM_WORKERS = 0
-cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_config)  # Let training initialize from mode$
 cfg.SOLVER.IMS_PER_BATCH = 8
 cfg.SOLVER.MAX_ITER = args.max_iter 
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
@@ -145,14 +148,15 @@ trainer.train()
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
 cfg.DATASETS.TEST = (damage_name+"_test",)
 
+model_out_path=param_data['MODEL']['OUT_PATH']
 try:
-    os.remove('output/last_checkpoint')
+    os.remove(model_out_path+'last_checkpoint')
 except OSError:
     pass
 
 dice_dict={}
 dice=[]
-model_list=glob.glob('output/*.pth')
+model_list=glob.glob(model_out_path+'*.pth')
 for md in model_list:
     if 'model' in md:
         if 'final' in md:
@@ -199,7 +203,7 @@ for md in model_list:
         dice_dict[md]=final_dice
 final_model = max(dice_dict, key=dice_dict.get) 
 final_dice_val=dice_dict[final_model]
-dice_dict_name='dice_dict.json'
+dice_dict_name=param_data['JSONS']['DICE_DICT']
 with open(dice_dict_name, 'w') as outfile:
     json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
 
