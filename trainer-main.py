@@ -1,5 +1,3 @@
-# Some basic setup:
-# Setup detectron2 logger
 import argparse
 import hypertune
 import detectron2
@@ -13,20 +11,13 @@ import PIL
 import json
 Image.MAX_IMAGE_PIXELS = 933120000
 import urllib
-# import some common libraries
 import numpy as np
 import os, json, cv2, random
 import glob,shutil
 import yaml
-with open('params.yaml', 'r') as stream:
-    param_data=yaml.safe_load(stream)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=param_data['ENVIRON']['GOOGLE_APPLICATION_CREDENTIALS']
-os.system('gsutil cp '+param_data['GOOGLE_STORAGE']['ORIGINAL']['BUCKET']+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE']+' .')
-os.system('unzip '+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE'])
 from detectron2.data import build_detection_test_loader
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-# import some common detectron2 utilities
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
@@ -38,6 +29,12 @@ from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data.datasets import register_coco_instances
 from google.cloud import storage
+
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=param_data['ENVIRON']['GOOGLE_APPLICATION_CREDENTIALS']
+os.system('gsutil cp '+param_data['GOOGLE_STORAGE']['ORIGINAL']['BUCKET']+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE']+' .')
+os.system('unzip '+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE'])
 
 parser = argparse.ArgumentParser(description='Input parameters need to be Specified for hypertuning')
 parser.add_argument(
@@ -119,14 +116,13 @@ cfg.merge_from_file(model_zoo.get_config_file(model_config))
 cfg.DATASETS.TRAIN = (damage_name+"_train",)
 cfg.DATASETS.TEST = (damage_name+"_val",)
 cfg.DATALOADER.NUM_WORKERS = 0
-cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_config)  # Let training initialize from mode$
+cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_config)
 cfg.SOLVER.IMS_PER_BATCH = 8
-cfg.SOLVER.MAX_ITER = args.max_iter 
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
+cfg.SOLVER.MAX_ITER = args.max_iter
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
 cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
-#cfg.TEST.EVAL_PERIOD = 5000
 cfg.SOLVER.MOMENTUM=args.MOMENTUM
-cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
+cfg.SOLVER.BASE_LR = args.lr
 cfg.MODEL.RPN.NMS_THRESH=args.NMS_THRESH
 cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=args.PRE_NMS_TOPK_TRAIN
 cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=args.PRE_NMS_TOPK_TEST
@@ -145,7 +141,7 @@ trainer = DefaultTrainer(cfg)
 trainer.resume_or_load(resume=False)
 trainer.train()
 
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test
 cfg.DATASETS.TEST = (damage_name+"_test",)
 
 model_out_path=param_data['MODEL']['OUT_PATH']
@@ -212,15 +208,9 @@ hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric
 
 
 def save_model(job_dir, model_name,dice_dict):
-    """Saves the model to Google Cloud Storage"""
-    # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
-    job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
-    # Get the Bucket Id
+    job_dir = job_dir.replace('gs://', '')
     bucket_id = job_dir.split('/')[0]
-    # Get the path. Example: 'hptuning_sonar/1'
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
-
-    # Upload the model to GCS
     bucket = storage.Client().bucket(bucket_id)
     blob = bucket.blob('{}/{}'.format(
         bucket_path,
