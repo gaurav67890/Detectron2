@@ -138,15 +138,11 @@ else:
 cfg.MODEL.ANCHOR_GENERATOR.SIZES=ANCHOR_SIZES
 
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-#trainer = CocoTrainer(cfg) 
 trainer = DefaultTrainer(cfg) 
 trainer.resume_or_load(resume=False)
 trainer.train()
 
-
-#cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
-#evaluator = COCOEvaluator("dent_test", cfg, False,output_dir="./output/")
 cfg.DATASETS.TEST = (damage_name+"_test",)
 
 try:
@@ -159,7 +155,6 @@ dice=[]
 model_list=glob.glob('output/*.pth')
 for md in model_list:
     if 'model' in md:
-        #print('Model name: '+i)
         if 'final' in md:
             continue
         cfg.MODEL.WEIGHTS = md
@@ -167,7 +162,6 @@ for md in model_list:
         with open(test_json) as f:
             data = json.load(f)
         dice=[]
-        #l=0
         for i in tqdm(range(len(data['images']))):
             try:
                 h=data['images'][i]['height']
@@ -183,26 +177,19 @@ for md in model_list:
                         fill_pts = np.array([p2], np.int32)
                         cv2.fillPoly(mask, fill_pts, 1)
                 if np.unique(mask,return_counts=True)[1][1]/(w*h)>0.000:
-                    #cv2.imwrite(data['images'][i]['file_name'],mask)
                     img=cv2.imread(img_dir+data['images'][i]['file_name'])
-                    #cv2.imwrite('im/original'+str(i)+'.png',img)
-                    #cv2.imwrite('im/mask'+str(i)+'.png',mask*255)
                     out = predictor(img)
                     pred = torch.sum(out['instances'].pred_masks,dim=0) > 0
                     pred = pred.cpu().detach().numpy()
                     pred=pred.astype(int)
-                    #cv2.imwrite('im/pred'+str(i)+'.png',pred*255)
                     intersection = np.logical_and(mask, pred)
                     if len(np.unique(pred,return_counts=True)[1])>1:
                         ground=np.unique(mask,return_counts=True)[1][1]
                         pred_val=np.unique(pred,return_counts=True)[1][1]
                         dice_score = 2*np.sum(intersection) / (ground+pred_val)
-                #print(dice_score)
                     else:
                         dice_score=0
-                #print(dice_score)
                     dice.append(dice_score)
-                    #l=l+1
             except Exception as e:
                 print(str(e))
         final_dice=sum(dice)/len(dice)
