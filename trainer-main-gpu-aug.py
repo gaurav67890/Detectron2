@@ -18,8 +18,6 @@ from detectron2 import model_zoo
 import os
 print(os.system('ls'))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
-#os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-#os.system('unzip split_damages.zip')
 from collections import OrderedDict
 import torch
 from detectron2.data.datasets import register_coco_instances
@@ -240,7 +238,6 @@ def setup(args):
     file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
-    #cfg.freeze()
     default_setup(cfg, args)
     return cfg
 
@@ -274,7 +271,6 @@ def dice_calc(damage_name,cfg):
     model_list=glob.glob('output/*.pth')
     for md in model_list:
         if 'model' in md:
-        #print('Model name: '+i)
             if 'final' in md:
                 continue
             cfg.MODEL.WEIGHTS = md
@@ -282,7 +278,6 @@ def dice_calc(damage_name,cfg):
             with open(test_json) as f:
                 data = json.load(f)
             dice=[]
-            #l=0
             for i in tqdm(range(len(data['images']))):
                 try:
                     h=data['images'][i]['height']
@@ -298,26 +293,19 @@ def dice_calc(damage_name,cfg):
                             fill_pts = np.array([p2], np.int32)
                             cv2.fillPoly(mask, fill_pts, 1)
                     if np.unique(mask,return_counts=True)[1][1]/(w*h)>0.000:
-                    #cv2.imwrite(data['images'][i]['file_name'],mask)
                         img=cv2.imread(img_dir+data['images'][i]['file_name'])
-                    #cv2.imwrite('im/original'+str(i)+'.png',img)
-                    #cv2.imwrite('im/mask'+str(i)+'.png',mask*255)
                         out = predictor(img)
                         pred = torch.sum(out['instances'].pred_masks,dim=0) > 0
                         pred = pred.cpu().detach().numpy()
                         pred=pred.astype(int)
-                        #cv2.imwrite('im/pred'+str(i)+'.png',pred*255)
                         intersection = np.logical_and(mask, pred)
                         if len(np.unique(pred,return_counts=True)[1])>1:
                             ground=np.unique(mask,return_counts=True)[1][1]
                             pred_val=np.unique(pred,return_counts=True)[1][1]
                             dice_score = 2*np.sum(intersection) / (ground+pred_val)
-                #print(dice_score)
                         else:
                             dice_score=0
-                    #print(dice_score)
                         dice.append(dice_score)
-                        #l=l+1
                 except Exception as e:
                     print(str(e))
             final_dice=sum(dice)/len(dice)
@@ -342,7 +330,6 @@ def convert_cfg(args):
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
-    #cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))    
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
@@ -351,7 +338,6 @@ def convert_cfg(args):
     cfg.SOLVER.MAX_ITER = args.max_iter 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
     cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
-    #cfg.TEST.EVAL_PERIOD = 5000
     cfg.SOLVER.MOMENTUM=args.MOMENTUM
     cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
     cfg.MODEL.RPN.NMS_THRESH=args.NMS_THRESH
@@ -416,7 +402,6 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    #cfg=convert_cfg(args)
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
 
