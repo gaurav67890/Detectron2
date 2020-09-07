@@ -16,8 +16,7 @@ from google.cloud import storage
 from pycocotools import coco
 from detectron2 import model_zoo
 import os
-print(os.system('ls'))
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/etc/credentials.json"
+import yaml
 from collections import OrderedDict
 import torch
 from detectron2.data.datasets import register_coco_instances
@@ -40,6 +39,9 @@ from detectron2.evaluation import (
 )
 from detectron2.modeling import GeneralizedRCNNWithTTA
 
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=param_data['ENVIRON']['GOOGLE_APPLICATION_CREDENTIALS']
 
 def default_argument_parser(epilog=None):
     """
@@ -330,9 +332,9 @@ def convert_cfg(args):
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")  # Let training initialize from mode$
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
     cfg.SOLVER.IMS_PER_BATCH = 8
-    cfg.SOLVER.MAX_ITER = args.max_iter 
+    cfg.SOLVER.MAX_ITER = args.max_iter
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
     cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
     cfg.SOLVER.MOMENTUM=args.MOMENTUM
@@ -382,10 +384,9 @@ def main(args):
 
 
 if __name__ == "__main__":
-    os.system('gsutil cp gs://hptuning2/split_damages.zip .')
-    os.system('unzip split_damages.zip')
-
-    os.makedirs('output', exist_ok=True)
+    os.system('gsutil cp '+param_data['GOOGLE_STORAGE']['ORIGINAL']['BUCKET']+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE']+' .')
+    os.system('unzip '+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE'])
+    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
@@ -401,18 +402,17 @@ if __name__ == "__main__":
 
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.thresh_test   # set a custom testing threshold for this model
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
-
+    model_out_path=param_data['MODEL']['OUT_PATH']
     try:
-        os.remove('output/last_checkpoint')
+        os.remove(model_out_path+'last_checkpoint')
     except OSError:
         pass
     final_model,final_dice_val,dice_dict=dice_calc(args.damage_name,cfg)
-    dice_dict_name='dice_dict.json'
+    dice_dict_name=param_data['JSONS']['DICE_DICT']
     with open(dice_dict_name, 'w') as outfile:
         json.dump(dice_dict,outfile,indent=4,ensure_ascii = False)
 
     hpt = hypertune.HyperTune()
     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag='dice', metric_value=final_dice_val, global_step=1)
-
 
     save_model(args.job_dir,final_model,dice_dict_name)
