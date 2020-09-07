@@ -52,7 +52,7 @@ Note: Make changes inside the last line of Dockerfile(ENTRYPOINT) according to y
 
 1.trainer-main.py is for single gpu
 2.trainer-main-gpu.py is for multiple gpus
-
+3. Also you can replace dent with crack, scratch,broken etc.
 ```
 
 ### 8. Get the image id for the above image, and use it to push the docker image to gcp
