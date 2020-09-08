@@ -4,16 +4,16 @@ ENVIRON:
 DATASET:
   ORIGINAL:
     DIR_PATH: "/detectron2_repo/split_damages/datasets/coco/"
-    IMAGES_PATH: "images/"
+    IMAGES_PATH: "/images/"
     TRAIN_PATH: "/annotations/instances_train.json"
     TEST_PATH: "/annotations/instances_test.json"
     VAL_PATH: "/annotations/instances_validation.json"
   AUGMENTED:
     DIR_PATH: "/detectron2_repo/"
-    IMAGES_PATH: "images/"
-    TRAIN_PATH: "train_total_aug.json"
-    TEST_PATH: "test_total.json"
-    VAL_PATH: "validation_total.json"
+    IMAGES_PATH: "/images/"
+    TRAIN_PATH: "/train_total_aug.json"
+    TEST_PATH: "/test_total.json"
+    VAL_PATH: "/validation_total.json"
   LOCAL:
     DIR_PATH: "/share/datasets/coco/"
     IMAGES_PATH: "images/"
@@ -32,3 +32,7 @@ GOOGLE_STORAGE:
   AUGMENTED:
     BUCKET: "gs://hptuning2/"
     DATAFILE: "dent_aug.zip"
+
+JSONS:
+  DICE_DICT: 'dice_dict.json'
+  TRAIN_LOSS: 'trainloss.json'
