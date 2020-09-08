@@ -234,7 +234,7 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
+    file_cfg=param_data['MODEL']['CONFIG']
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
     default_setup(cfg, args)
