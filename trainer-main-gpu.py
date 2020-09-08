@@ -233,25 +233,19 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    file_cfg='configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
+    file_cfg=param_data['MODEL']['CONFIG']
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
-    #cfg.freeze()
     default_setup(cfg, args)
     return cfg
 
 
 
 def save_model(job_dir, model_name,dice_dict):
-    """Saves the model to Google Cloud Storage"""
-    # Example: job_dir = 'gs://BUCKET_ID/hptuning_sonar/1'
-    job_dir = job_dir.replace('gs://', '')  # Remove the 'gs://'
-    # Get the Bucket Id
+    job_dir = job_dir.replace('gs://', '')
     bucket_id = job_dir.split('/')[0]
-    # Get the path. Example: 'hptuning_sonar/1'
     bucket_path = job_dir.lstrip('{}/'.format(bucket_id))
 
-    # Upload the model to GCS
     bucket = storage.Client().bucket(bucket_id)
     blob = bucket.blob('{}/{}'.format(
         bucket_path,
@@ -263,11 +257,11 @@ def save_model(job_dir, model_name,dice_dict):
     blob.upload_from_filename(dice_dict)
 
 def dice_calc(damage_name,cfg):
-    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
-    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
+    test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+    img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
     dice_dict={}
     dice=[]
-    model_list=glob.glob('output/*.pth')
+    model_list=glob.glob(param_data['MODEL']['OUT_PATH']+'/*.pth')
     for md in model_list:
         if 'model' in md:
             if 'final' in md:
@@ -320,11 +314,11 @@ def convert_cfg(args):
     cfg = setup(args)
     damage_name=args.damage_name
 
-    train_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_train.json"
-    val_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_validation.json"
-    test_json="/detectron2_repo/split_damages/datasets/coco/"+damage_name+"/annotations/instances_test.json"
+    train_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TRAIN_PATH']
+    val_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
+    test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+    img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
 
-    img_dir="/detectron2_repo/split_damages/datasets/coco/images/"
     register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
     register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
@@ -332,13 +326,13 @@ def convert_cfg(args):
     cfg.DATASETS.TRAIN = (damage_name+"_train",)
     cfg.DATASETS.TEST = (damage_name+"_val",)
     cfg.DATALOADER.NUM_WORKERS = 0
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
     cfg.SOLVER.IMS_PER_BATCH = 8
     cfg.SOLVER.MAX_ITER = args.max_iter
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (dent)
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
     cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
     cfg.SOLVER.MOMENTUM=args.MOMENTUM
-    cfg.SOLVER.BASE_LR = args.lr  # pick a good LR
+    cfg.SOLVER.BASE_LR = args.lr
     cfg.MODEL.RPN.NMS_THRESH=args.NMS_THRESH
     cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=args.PRE_NMS_TOPK_TRAIN
     cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=args.PRE_NMS_TOPK_TEST
@@ -384,8 +378,10 @@ def main(args):
 
 
 if __name__ == "__main__":
-    os.system('gsutil cp '+param_data['GOOGLE_STORAGE']['ORIGINAL']['BUCKET']+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE']+' .')
-    os.system('unzip '+param_data['GOOGLE_STORAGE']['ORIGINAL']['DATAFILE'])
+    MODE='AUGMENTED'
+    os.system('gsutil cp '+param_data['GOOGLE_STORAGE'][MODE]['BUCKET']+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE']+' .')
+    os.system('unzip '+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE'])
+
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
@@ -404,7 +400,7 @@ if __name__ == "__main__":
     cfg.DATASETS.TEST = (args.damage_name+"_test",)
     model_out_path=param_data['MODEL']['OUT_PATH']
     try:
-        os.remove(model_out_path+'last_checkpoint')
+        os.remove(param_data['MODEL']['OUT_PATH']+'last_checkpoint')
     except OSError:
         pass
     final_model,final_dice_val,dice_dict=dice_calc(args.damage_name,cfg)
