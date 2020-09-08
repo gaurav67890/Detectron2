@@ -50,7 +50,7 @@ docker build --no-cache --build-arg USER_ID=$UID -f Dockerfile -t $IMAGE_URI ./
 
 Note: Make changes inside the last line of Dockerfile(ENTRYPOINT) according to your requirements.
 
-1.trainer-main.py is for single gpu
+1.trainer-main-gpu-single.py is for single gpu
 2.trainer-main-gpu.py is for multiple gpus
 3. Also you can replace dent with crack, scratch,broken etc.
 ```
@@ -72,9 +72,8 @@ gcloud ai-platform jobs describe hp_tuning_scratch_container_job_20200819_204006
 
 #this will generate the url for the job status and log which you can click. 
 ```
-### 11. Mission accomplished, Have fun tuning !
+### 11. To calculate the DICE and MAP locally, make use of custom_test_net_MAP.py and custome_test_net_DICE.py
 
-![alt-text](https://github.com/gaurav67890/Detectron2/blob/feat/AICAR-325-hyperparameter-tuning-scratch/landscape-1467725698-leonardo-di-caprio-great-gatsby.gif)
 
 
 
