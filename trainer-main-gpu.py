@@ -387,7 +387,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    MODE='AUGMENTED'
+    MODE='LOCAL'
     os.system('gsutil cp '+param_data['GOOGLE_STORAGE'][MODE]['BUCKET']+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE']+' .')
     os.system('unzip '+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE'])
 
