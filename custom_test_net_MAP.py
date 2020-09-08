@@ -12,6 +12,7 @@ import urllib
 # import some common libraries
 import numpy as np
 import os, json, cv2, random
+import yaml
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 # import some common detectron2 utilities
@@ -27,18 +28,22 @@ from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data.datasets import register_coco_instances
 from detectron2.evaluation import inference_on_dataset
 
-
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
 
 damage_name='crack'
-test_json="/share/datasets/coco/"+damage_name+"/annotations/instances_test.json"
-img_dir="/share/datasets/coco/images/"
+mode='LOCAL'
+
+dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
+test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
 cfg = get_cfg()
-cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
+cfg.merge_from_file(model_zoo.get_config_file(param_data['MODEL']['CONFIG']))
 cfg.DATASETS.TEST = (damage_name+"_test",)
 cfg.DATALOADER.NUM_WORKERS = 0
-cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
+cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
 cfg.SOLVER.IMS_PER_BATCH = 1
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1 
 cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
