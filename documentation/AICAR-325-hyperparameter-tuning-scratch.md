@@ -75,5 +75,5 @@ gcloud ai-platform jobs describe hp_tuning_scratch_container_job_20200819_204006
 ### 11. To calculate the DICE and MAP locally, make use of custom_test_net_MAP.py and custome_test_net_DICE.py
 
 
-
+### 12. All the path related parameters are present inside params.yaml
 
