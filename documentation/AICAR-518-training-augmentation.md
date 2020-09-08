@@ -4,10 +4,9 @@
 
 ### 1. All the steps from building docker and running gcp will remain same from feat/AICAR-325-hyperparameter-tuning-scratch branch
 
+### 2. Addition of mode has been done, where we select ORIGINAL or AUGMENTED for the type of dataset we want to use for training. All the parameters related to path are presents inside params.yaml 
 
-### 2. Changes are made inside the Dockerfile where we used trainer-main-gpu-aug.py python file and instead of scraping split_damages dataset, we are using dent_aug dataset from google storage.
-
-### 3. Also it is important to note that in this branch we cannot use any damage other than dent, since we are specifically downloading the dent dataset from google storage.
+### 3. Also it is important to note that for MODE= AUGMENTED we cannot use any damage other than dent for now, since we are specifically downloading the dent dataset from google storage.
 
 
 
