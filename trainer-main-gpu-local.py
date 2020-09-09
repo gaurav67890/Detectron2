@@ -230,7 +230,7 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    file_cfg=param_data['MODEL']['CONFIG']
+    file_cfg='configs/'+param_data['MODEL']['CONFIG']
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
     default_setup(cfg, args)
@@ -357,16 +357,14 @@ def main(args):
 
 
 if __name__ == "__main__":
-    MODE='AUGMENTED'
-    os.system('gsutil cp '+param_data['GOOGLE_STORAGE'][MODE]['BUCKET']+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE']+' .')
-    os.system('unzip '+param_data['GOOGLE_STORAGE'][MODE]['DATAFILE'])
+    MODE='LOCAL'
 
-    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     print ('Available devices ', torch.cuda.device_count())
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
     dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
     cfg=convert_cfg(args)
+    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     launch(
         main,
         args.num_gpus,
