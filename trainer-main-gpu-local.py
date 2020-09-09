@@ -230,7 +230,7 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    file_cfg=param_data['MODEL']['CONFIG']
+    file_cfg='configs/'+param_data['MODEL']['CONFIG']
     cfg.merge_from_file(file_cfg)
     cfg.merge_from_list(args.opts)
     default_setup(cfg, args)
