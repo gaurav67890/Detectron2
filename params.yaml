@@ -15,11 +15,11 @@ DATASET:
     TEST_PATH: "/test_total.json"
     VAL_PATH: "/validation_total.json"
   LOCAL:
-    DIR_PATH: "/share/datasets/coco/"
-    IMAGES_PATH: "images/"
-    TRAIN_PATH: "/annotations/instances_train.json"
-    TEST_PATH: "/annotations/instances_test.json"
-    VAL_PATH: "/annotations/instances_validation.json"
+    DIR_PATH: "/share/"
+    IMAGES_PATH: "/images/"
+    TRAIN_PATH: "/merged_train.json"
+    TEST_PATH: "/merged_test.json"
+    VAL_PATH: "/merged_validation.json"
 
 MODEL:
   OUT_PATH: "output/"
