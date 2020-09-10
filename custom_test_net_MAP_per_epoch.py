@@ -74,7 +74,7 @@ for m in model_path:
         print('Results: ')
         print(results)
         print('MAP:50 value: ',map_val)
-        res_dict[m]={'AP50':results['bbox']['AP50'],'AP-'+categories[0]:results['bbox']['AP-'+categories[0]],'AP-'+categories[1]:results['bbox']['AP-'+categories[1]]}
+        res_dict[m]={'AP50':results['bbox']['AP50'],'AP50-'+categories[0]:results['bbox']['AP50-'+categories[0]],'AP50-'+categories[1]:results['bbox']['AP50-'+categories[1]]}
         with open('res_dict.json','w') as f:
             json.dump(res_dict,f,indent=4,ensure_ascii = False)
     except Exception as e:
