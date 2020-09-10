@@ -34,9 +34,9 @@ from detectron2.data.datasets import register_coco_instances
 #args = parser.parse_args()
 #lr = args.lr
 
-train_json="/share/merged_scratch/merged_train.json"
-val_json="/share/merged_scratch/merged_validation.json"
-test_json="/share/merged_scratch/merged_test.json"
+train_json="/share/merged_scratch/new_merged_train.json"
+val_json="/share/merged_scratch/new_merged_validation.json"
+test_json="/share/merged_scratch/new_merged_test.json"
 
 img_dir="/share/merged_scratch/images/"
 register_coco_instances("scratch_train", {}, train_json, img_dir)
