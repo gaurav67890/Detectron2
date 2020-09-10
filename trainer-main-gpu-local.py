@@ -237,60 +237,6 @@ def setup(args):
     return cfg
 
 
-def dice_calc(damage_name,cfg):
-    test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
-    img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
-    dice_dict={}
-    dice=[]
-    model_list=glob.glob(param_data['MODEL']['OUT_PATH']+'/*.pth')
-    for md in model_list:
-        if 'model' in md:
-            if 'final' in md:
-                continue
-            cfg.MODEL.WEIGHTS = md
-            predictor = DefaultPredictor(cfg)
-            with open(test_json) as f:
-                data = json.load(f)
-            dice=[]
-            for i in tqdm(range(len(data['images']))):
-                try:
-                    h=data['images'][i]['height']
-                    w=data['images'][i]['width']
-                    mask=np.zeros((h,w),dtype='uint8')
-                    for j in range(len(data['annotations'])):
-                        if data['annotations'][j]['image_id']==data['images'][i]['id']:
-                            p1=data['annotations'][j]['segmentation'][0]
-                            p1=[int(i) for i in p1]
-                            p2=[]
-                            for p in range(int(len(p1)/2)):
-                                p2.append([p1[2*p],p1[2*p+1]])
-                            fill_pts = np.array([p2], np.int32)
-                            cv2.fillPoly(mask, fill_pts, 1)
-                    if np.unique(mask,return_counts=True)[1][1]/(w*h)>0.000:
-                        img=cv2.imread(img_dir+data['images'][i]['file_name'])
-                        out = predictor(img)
-                        pred = torch.sum(out['instances'].pred_masks,dim=0) > 0
-                        pred = pred.cpu().detach().numpy()
-                        pred=pred.astype(int)
-                        intersection = np.logical_and(mask, pred)
-                        if len(np.unique(pred,return_counts=True)[1])>1:
-                            ground=np.unique(mask,return_counts=True)[1][1]
-                            pred_val=np.unique(pred,return_counts=True)[1][1]
-                            dice_score = 2*np.sum(intersection) / (ground+pred_val)
-                        else:
-                            dice_score=0
-                        dice.append(dice_score)
-                except Exception as e:
-                    print(str(e))
-            final_dice=sum(dice)/len(dice)
-
-            print('Model name: '+md)
-            print('Dice value: ',str(final_dice))
-            dice_dict[md]=final_dice
-    final_model = max(dice_dict, key=dice_dict.get) 
-    final_dice_val=dice_dict[final_model]
-    return final_model,final_dice_val,dice_dict
-
 def convert_cfg(args):
     cfg = setup(args)
     damage_name=args.damage_name
