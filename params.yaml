@@ -17,9 +17,9 @@ DATASET:
   LOCAL:
     DIR_PATH: "/share/"
     IMAGES_PATH: "/images/"
-    TRAIN_PATH: "/train_total.json"
-    TEST_PATH: "/test_total.json"
-    VAL_PATH: "/validation_total.json"
+    TRAIN_PATH: "/merged_train.json"
+    TEST_PATH: "/merged_test.json"
+    VAL_PATH: "/merged_validation.json"
 
 MODEL:
   OUT_PATH: "output/"

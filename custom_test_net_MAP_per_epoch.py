@@ -1,5 +1,6 @@
 import detectron2
 from detectron2.utils.logger import setup_logger
+from detectron2.data import MetadataCatalog
 import json
 setup_logger()
 try:
@@ -36,7 +37,7 @@ with open('params.yaml', 'r') as stream:
 
 damage_name='merged_scratch'
 MODE='LOCAL'
-
+categories=['big_scratch','thin_scratch']
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
 test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
 img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
@@ -73,7 +74,7 @@ for m in model_path:
         print('Results: ')
         print(results)
         print('MAP:50 value: ',map_val)
-        res_dict[m]={'AP50':results['bbox']['AP50'],'AP-'+'big_scratch':results['bbox']['AP-'+'big_scratch'],'AP-'+'thin_scratch':results['bbox']['AP-'+'thin_scratch']}
+        res_dict[m]={'AP50':results['bbox']['AP50'],'AP-'+categories[0]:results['bbox']['AP-'+categories[0]],'AP-'+categories[1]:results['bbox']['AP-'+categories[1]]}
         with open('res_dict.json','w') as f:
             json.dump(res_dict,f,indent=4,ensure_ascii = False)
     except Exception as e:
