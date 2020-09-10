@@ -116,12 +116,12 @@ Run on multiple machines:
         default=0.4,
         help='testing threshold')
     parser.add_argument(
-        '--lr', default=0.00025, 
+        '--lr', default=0.0025, 
         type=float, 
         help='Learning rate parameter')
     parser.add_argument('--MOMENTUM',  # Specified in the config file
         type=float,
-        default=0.5,
+        default=0.9,
         help='SGD momentum (default: 0.5)')
     parser.add_argument('--ANCHOR_SIZES',  # Specified in the config file
         type=int,
@@ -133,7 +133,7 @@ Run on multiple machines:
         help='PRE_NMS_TOPK_TRAIN (default: 12000)')
     parser.add_argument('--PRE_NMS_TOPK_TEST',  # Specified in the config file
         type=int,
-        default=12000,
+        default=6000,
         help='PRE_NMS_TOPK_TEST (default: 6000)')
     parser.add_argument('--POST_NMS_TOPK_TRAIN',  # Specified in the config file
         type=int,
@@ -294,11 +294,12 @@ def dice_calc(damage_name,cfg):
 def convert_cfg(args):
     cfg = setup(args)
     damage_name=args.damage_name
-
+    print("dataset_dir: "+dataset_dir)
+    #sys.exit()
     train_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TRAIN_PATH']
     val_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
     test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
-
+    print("dataset_dir: "+train_json)
     img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
     register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
@@ -309,8 +310,8 @@ def convert_cfg(args):
     cfg.DATALOADER.NUM_WORKERS = 0
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
     cfg.SOLVER.IMS_PER_BATCH = args.batch_size
-    cfg.SOLVER.MAX_ITER = args.max_iter 
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1 
+    cfg.SOLVER.MAX_ITER = args.max_iter
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
     cfg.SOLVER.CHECKPOINT_PERIOD = args.check_period
     cfg.SOLVER.MOMENTUM=args.MOMENTUM
     cfg.SOLVER.BASE_LR = args.lr 
@@ -364,6 +365,9 @@ if __name__ == "__main__":
     print("Command Line Args:", args)
     dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
     cfg=convert_cfg(args)
+    print(cfg)
+    print(cfg.DATASETS.TRAIN)
+    #sys.exit()
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     launch(
         main,

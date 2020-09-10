@@ -9,6 +9,8 @@ except ImportError:
 import PIL
 Image.MAX_IMAGE_PIXELS = 933120000
 import urllib
+import glob
+import sys
 # import some common libraries
 import numpy as np
 import os, json, cv2, random
@@ -27,6 +29,7 @@ from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data.datasets import register_coco_instances
 from detectron2.evaluation import inference_on_dataset
+from detectron2.data import build_detection_test_loader
 
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
@@ -54,22 +57,24 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 #cfg.SOLVER.MOMENTUM= 0.95
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
-cfg.MODEL.WEIGHTS = "/detectron2_repo/output/model_0009999.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
 
-
-from detectron2.data import build_detection_test_loader
-predictor = DefaultPredictor(cfg)
-
-map_dict={}
-from detectron2.evaluation import inference_on_dataset
-predictor = DefaultPredictor(cfg)
-val_loader = build_detection_test_loader(cfg, damage_name+"_test")
-evaluator = COCOEvaluator(damage_name+"_test", cfg, False,output_dir=None)
-results=inference_on_dataset(predictor.model, val_loader, evaluator)
-map_val=results['bbox']['AP50']
-print('Results: ')
-print(results)
-print('MAP:50 value: ',map_val)
-
-
+res_dict={}
+model_path=glob.glob('./output/*.pth')
+for m in model_path:
+    try:
+        cfg.MODEL.WEIGHTS = m
+        predictor = DefaultPredictor(cfg)
+        val_loader = build_detection_test_loader(cfg, damage_name+"_test")
+        evaluator = COCOEvaluator(damage_name+"_test", cfg, False,output_dir=None)
+        results=inference_on_dataset(predictor.model, val_loader, evaluator)
+        map_val=results['bbox']['AP50']
+        print('Model :'+m)
+        print('Results: ')
+        print(results)
+        print('MAP:50 value: ',map_val)
+        res_dict[m]={'AP50':results['bbox']['AP50'],'AP-'+'big_scratch':results['bbox']['AP-'+'big_scratch'],'AP-'+'thin_scratch':results['bbox']['AP-'+'thin_scratch']}
+        with open('res_dict.json','w') as f:
+            json.dump(res_dict,f,indent=4,ensure_ascii = False)
+    except Exception as e:
+        print(e)
