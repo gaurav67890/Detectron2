@@ -1,11 +1,11 @@
 import json
 
-mode='train.json'
+mode='validation.json'
 
 new_data={}
-with open('thin/'+mode) as f:
+with open('thin_scratch/'+mode) as f:
     thin_data=json.load(f)
-with open('big/'+mode) as f:
+with open('big_scratch/'+mode) as f:
     big_data=json.load(f)
 
 thin_data_images={}
@@ -27,15 +27,16 @@ for i in range(len(big_data['annotations'])):
         file_name=big_data_images[big_data['annotations'][i]['image_id']]
         if file_name in thin_data_images.keys():
             image_id_new= thin_data_images[file_name]
+            remove_image_id.append(big_data['annotations'][i]['image_id']+10000)
             big_data['annotations'][i]['image_id']=image_id_new
-            remove_image_id.append(big_data['annotations'][i]['image_id'])
+            #remove_image_id.append(big_data['annotations'][i]['image_id'])
         else:
             big_data['annotations'][i]['image_id'] = big_data['annotations'][i]['image_id'] + 10000
     else:
         big_data['annotations'][i]['image_id'] = big_data['annotations'][i]['image_id'] + 10000
 
-for i in range(len(thin_data['images'])):
-    big_data['images']=[x for x in thin_data['images'] if x['id'] not in remove_image_id]
+#print(remove_image_id)
+big_data['images']=[x for x in big_data['images'] if x['id'] not in remove_image_id]
 
 
 big_data['categories'][0]['id']=1
@@ -46,7 +47,7 @@ new_data['images']=thin_data['images']+big_data['images']
 new_data['annotations']=thin_data['annotations']+big_data['annotations']
 new_data['categories']=thin_data['categories']+big_data['categories']
 
-with open('new_merge_'+mode,'w') as f:
+with open('merged_scratch/new_merged_'+mode,'w') as f:
     json.dump(new_data,f,indent=4,ensure_ascii = False)
 
 
