@@ -55,7 +55,7 @@ cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG']) 
 cfg.SOLVER.CHECKPOINT_PERIOD=1000
 cfg.SOLVER.IMS_PER_BATCH = 2
 cfg.SOLVER.BASE_LR = 0.0025  # pick a good LR
-cfg.SOLVER.MAX_ITER = 30000
+cfg.SOLVER.MAX_ITER = 50000
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 
 
