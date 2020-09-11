@@ -58,7 +58,7 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 #cfg.SOLVER.MOMENTUM= 0.95
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
 
 res_dict={}
 model_path=glob.glob('./output/*.pth')
@@ -75,7 +75,7 @@ for m in model_path:
         print(results)
         print('MAP:50 value: ',map_val)
         res_dict[m]={'AP50':results['bbox']['AP50'],'AP50-'+categories[0]:results['bbox']['AP50-'+categories[0]],'AP50-'+categories[1]:results['bbox']['AP50-'+categories[1]]}
-        with open('res_dict.json','w') as f:
+        with open('res_dict_5.json','w') as f:
             json.dump(res_dict,f,indent=4,ensure_ascii = False)
     except Exception as e:
         print(e)
