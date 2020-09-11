@@ -30,8 +30,11 @@ ap.add_argument("-dn", "--damage_name", required=True, help="name of the damage"
 args = vars(ap.parse_args())
 
 damage_name=args['damage_name']
-dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
 
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
+MODE='LOCAL'
+dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
 train_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TRAIN_PATH']
 val_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
 test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
