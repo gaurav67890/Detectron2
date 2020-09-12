@@ -35,11 +35,11 @@ from detectron2.data import build_detection_test_loader
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='merged_scratch'
+damage_name='dent_ding'
 MODE='LOCAL'
-categories=['big_scratch','thin_scratch']
+categories=['dent','ding']
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
-test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
 img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
@@ -75,7 +75,7 @@ for m in model_path:
         print(results)
         print('MAP:50 value: ',map_val)
         res_dict[m]={'AP50':results['bbox']['AP50'],'AP50-'+categories[0]:results['bbox']['AP50-'+categories[0]],'AP50-'+categories[1]:results['bbox']['AP50-'+categories[1]]}
-        with open('res_dict_5.json','w') as f:
+        with open('res_dict_dent.json','w') as f:
             json.dump(res_dict,f,indent=4,ensure_ascii = False)
     except Exception as e:
         print(e)

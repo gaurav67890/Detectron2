@@ -33,11 +33,11 @@ from detectron2.data.datasets import register_coco_instances
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='merged_scratch'
+damage_name='dent_ding'
 MODE='LOCAL'
 
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
-test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
 img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
@@ -47,7 +47,7 @@ cfg.merge_from_file(model_zoo.get_config_file(param_data['MODEL']['CONFIG']))
 cfg.DATASETS.TEST = (damage_name+"_test",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
-cfg.SOLVER.IMS_PER_BATCH = 4
+cfg.SOLVER.IMS_PER_BATCH = 1
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 # cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
 # cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=12000
@@ -58,7 +58,7 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
 
-cfg.MODEL.WEIGHTS = "output/model_0010999.pth"
+cfg.MODEL.WEIGHTS = "output/model_0040999.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
 
 
@@ -133,7 +133,7 @@ for i in tqdm(range(len(data['images']))):
                 else:
                     continue
             dice[cls_idx].append(dice_score)
-            print(dice)
+            #print(dice)
                 
     except Exception as e:
         print(e)
