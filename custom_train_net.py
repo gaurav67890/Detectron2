@@ -48,11 +48,11 @@ cfg.DATASETS.TRAIN = ("damage_train",)
 cfg.DATASETS.TEST = ("damage_val",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])  # Let training initialize from mode$
-cfg.SOLVER.CHECKPOINT_PERIOD=1000
+cfg.SOLVER.CHECKPOINT_PERIOD=2000
 cfg.SOLVER.IMS_PER_BATCH = 2
 cfg.SOLVER.BASE_LR = 0.0025  # pick a good LR
-cfg.SOLVER.MAX_ITER = 30000
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
+cfg.SOLVER.MAX_ITER = 60000
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
 
 
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
