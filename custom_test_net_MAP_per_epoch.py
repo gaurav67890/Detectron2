@@ -48,7 +48,7 @@ cfg.DATASETS.TEST = (damage_name+"_test",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
 cfg.SOLVER.IMS_PER_BATCH = 4
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2 
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
 #cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
 #cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=12000
 #cfg.MODEL.RPN.POST_NMS_TOPK_TRAIN=2200
@@ -74,7 +74,7 @@ for m in model_path:
         print('Results: ')
         print(results)
         print('MAP:50 value: ',map_val)
-        res_dict[m]=map_val
+        res_dict[m]=results
         with open(damage_name+'_res_dict.json','w') as f:
             json.dump(res_dict,f,indent=4,ensure_ascii = False)
     except Exception as e:
