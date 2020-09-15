@@ -240,12 +240,9 @@ def setup(args):
 def convert_cfg(args):
     cfg = setup(args)
     damage_name=args.damage_name
-    print("dataset_dir: "+dataset_dir)
-    #sys.exit()
     train_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TRAIN_PATH']
     val_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
     test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
-    print("dataset_dir: "+train_json)
     img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
     register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
     register_coco_instances(damage_name+"_val", {}, val_json, img_dir)
@@ -311,9 +308,6 @@ if __name__ == "__main__":
     print("Command Line Args:", args)
     dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
     cfg=convert_cfg(args)
-    print(cfg)
-    print(cfg.DATASETS.TRAIN)
-    #sys.exit()
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     launch(
         main,
