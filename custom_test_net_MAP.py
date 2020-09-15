@@ -27,6 +27,8 @@ from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data.datasets import register_coco_instances
 from detectron2.evaluation import inference_on_dataset
+from detectron2.data import build_detection_test_loader
+
 
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
@@ -54,15 +56,10 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 #cfg.SOLVER.MOMENTUM= 0.95
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
-cfg.MODEL.WEIGHTS = "/detectron2_repo/output/model_0009999.pth"
+
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
-
-
-from detectron2.data import build_detection_test_loader
 predictor = DefaultPredictor(cfg)
-
-map_dict={}
-from detectron2.evaluation import inference_on_dataset
+cfg.MODEL.WEIGHTS = "/detectron2_repo/output/model_0009999.pth"
 predictor = DefaultPredictor(cfg)
 val_loader = build_detection_test_loader(cfg, damage_name+"_test")
 evaluator = COCOEvaluator(damage_name+"_test", cfg, False,output_dir=None)
