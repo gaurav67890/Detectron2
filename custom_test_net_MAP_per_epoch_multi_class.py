@@ -35,7 +35,7 @@ from detectron2.data import build_detection_test_loader
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='merged_scratch'
+damage_name='scratch_2'
 MODE='LOCAL'
 categories=['big_scratch','thin_scratch']
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']

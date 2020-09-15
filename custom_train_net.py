@@ -1,3 +1,4 @@
+import yaml
 import argparse
 import detectron2
 from detectron2.utils.logger import setup_logger
@@ -28,6 +29,10 @@ from detectron2.data.datasets import register_coco_instances
 ap = argparse.ArgumentParser()
 ap.add_argument("-dn", "--damage_name", required=True, help="name of the damage")
 args = vars(ap.parse_args())
+
+with open('params.yaml', 'r') as stream:
+    param_data=yaml.safe_load(stream)
+MODE='LOCAL'
 
 damage_name=args['damage_name']
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
