@@ -30,7 +30,7 @@ with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
 damage_name='scratch_2'
-mode='LOCAL'
+MODE='LOCAL'
 
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
 test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
