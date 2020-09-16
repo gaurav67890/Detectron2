@@ -57,8 +57,8 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
 
-cfg.MODEL.WEIGHTS = "output/model_0010999.pth"
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
+cfg.MODEL.WEIGHTS = "/share/bigthin_scratch/model_0009999.pth"
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3   # set a custom testing threshold for this model
 
 
 
