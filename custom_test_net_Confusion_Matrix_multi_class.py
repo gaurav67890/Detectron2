@@ -46,7 +46,7 @@ def rect_area(a, b):  # returns None if rectangles don't intersect
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='scratch_2'
+damage_name='dent_ding'
 MODE='LOCAL'
 
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
@@ -61,7 +61,7 @@ cfg.DATASETS.TEST = (damage_name+"_test",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
 cfg.SOLVER.IMS_PER_BATCH = 1
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 # cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
 # cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=12000
 # cfg.MODEL.RPN.POST_NMS_TOPK_TRAIN=2200
@@ -71,7 +71,7 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
 
-cfg.MODEL.WEIGHTS = "output/model_0041999.pth"
+cfg.MODEL.WEIGHTS = "/share/dentding_dent/model_0040999.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
 
 
@@ -91,8 +91,8 @@ for i in data['categories']:
 
 tp=0
 fp=0
-
-
+fn=0
+confusion_matrix={}
 cf_dict_per_image={}
 for cat in category_dict.keys():
     cf_dict_per_image[category_dict[cat]]={}
@@ -112,7 +112,9 @@ for cat in category_dict.keys():
                     r_org=Rectangle(bbox_org[0], bbox_org[1],bbox_org[2]+bbox_org[0] , bbox_org[3]+bbox_org[1])
                     org_bbox_dict[org_bbox_id]=r_org
                     org_bbox_id=org_bbox_id+1
-
+            
+            if len(org_bbox_dict)==0:
+                  continue
             img=cv2.imread(img_dir+data['images'][i]['file_name'])
             outputs = predictor(img)
             classes_pred=outputs["instances"].pred_classes.tolist()
@@ -122,7 +124,9 @@ for cat in category_dict.keys():
             print(data['images'][i]['file_name'])
             tp_temp=0
             fp_temp=0
+            fn_temp=0
             area_list=[]
+            bbox_detected=[]
             for cl,k in zip(classes_pred,bbox_pred):
                 #print('start')
                 if cl != cat:
@@ -139,20 +143,21 @@ for cat in category_dict.keys():
                 if area_final>0.5:
                     tp=tp+1
                     tp_temp=tp_temp+1
+                    bbox_detected.append(org_keys)
                 else:
                     fp=fp+1
                     fp_temp=fp_temp+1
                 print(tp,fp)
-            cf_dict_per_image[category_dict[cat]][data['images'][i]['file_name']]={'tp':tp_temp,'fp':fp_temp,'area':area_list}
+            fn_temp=len(org_bbox_dict.keys()) -len(list(set(bbox_detected)))
+            fn=fn+fn_temp
+            cf_dict_per_image[category_dict[cat]][data['images'][i]['file_name']]={'tp':tp_temp,'fp':fp_temp,'fn':fn_temp,'pred_class':classes_pred,'org_count':org_bbox_dict,'area':area_list}
 
         except Exception as e:
             print(e)
         
-    confusion_matrix[category_dict[cat]]={'true_positve':tp,'false_positive':fp}
+    confusion_matrix[category_dict[cat]]={'true_positve':tp,'false_positive':fp, 'false_negative':fn}
 
-with open('cf_dict_per_image.json', 'w') as outfile:
+with open(damage_name+'cf_dict_per_image.json', 'w') as outfile:
         json.dump(cf_dict_per_image,outfile,indent=4,ensure_ascii = False)
-with open('confusion_matrix.json', 'w') as outfile:
+with open(damage_name+'confusion_matrix.json', 'w') as outfile:
         json.dump(confusion_matrix,outfile,indent=4,ensure_ascii = False)
-
-
