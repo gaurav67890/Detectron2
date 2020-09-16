@@ -53,8 +53,8 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
 
-cfg.MODEL.WEIGHTS = "/share/crack_model/model_0002399.pth"
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
+cfg.MODEL.WEIGHTS = "./output/model_0033999.pth"
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
 
 
 from detectron2.data import build_detection_test_loader
