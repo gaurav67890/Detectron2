@@ -113,8 +113,8 @@ for cat in category_dict.keys():
                     org_bbox_dict[org_bbox_id]=r_org
                     org_bbox_id=org_bbox_id+1
             
-            if len(org_bbox_dict)==0:
-                  continue
+            #if len(org_bbox_dict)==0:
+            #      continue
             img=cv2.imread(img_dir+data['images'][i]['file_name'])
             outputs = predictor(img)
             classes_pred=outputs["instances"].pred_classes.tolist()
