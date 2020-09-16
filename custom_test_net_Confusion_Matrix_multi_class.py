@@ -112,7 +112,9 @@ for cat in category_dict.keys():
                     r_org=Rectangle(bbox_org[0], bbox_org[1],bbox_org[2]+bbox_org[0] , bbox_org[3]+bbox_org[1])
                     org_bbox_dict[org_bbox_id]=r_org
                     org_bbox_id=org_bbox_id+1
-
+            
+            if len(org_bbox_dict)==0:
+                  continue
             img=cv2.imread(img_dir+data['images'][i]['file_name'])
             outputs = predictor(img)
             classes_pred=outputs["instances"].pred_classes.tolist()
@@ -148,7 +150,7 @@ for cat in category_dict.keys():
                 print(tp,fp)
             fn_temp=len(org_bbox_dict.keys()) -len(list(set(bbox_detected)))
             fn=fn+fn_temp
-            cf_dict_per_image[category_dict[cat]][data['images'][i]['file_name']]={'tp':tp_temp,'fp':fp_temp,'fn':fn_temp,'area':area_list}
+            cf_dict_per_image[category_dict[cat]][data['images'][i]['file_name']]={'tp':tp_temp,'fp':fp_temp,'fn':fn_temp,'pred_class':classes_pred,'org_count':org_bbox_dict,'area':area_list}
 
         except Exception as e:
             print(e)
