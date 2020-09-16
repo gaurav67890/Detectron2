@@ -31,11 +31,11 @@ from detectron2.evaluation import inference_on_dataset
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='merged_scratch'
+damage_name='dent_ding'
 MODE='LOCAL'
 
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
-test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
+test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
 img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
@@ -54,7 +54,7 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 #cfg.SOLVER.MOMENTUM= 0.95
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
-cfg.MODEL.WEIGHTS = "/detectron2_repo/output/model_0009999.pth"
+cfg.MODEL.WEIGHTS = "/share/dentding_dent/model_0040999.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
 
 
