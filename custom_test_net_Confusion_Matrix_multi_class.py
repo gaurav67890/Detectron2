@@ -46,11 +46,11 @@ def rect_area(a, b):  # returns None if rectangles don't intersect
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='dent_ding'
+damage_name='scratch_2'
 MODE='LOCAL'
 
 dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
-test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['VAL_PATH']
+test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
 train_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TRAIN_PATH']
 img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
@@ -61,7 +61,7 @@ cfg.DATASETS.TEST = (damage_name+"_test",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
 cfg.SOLVER.IMS_PER_BATCH = 1
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
 # cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
 # cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=12000
 # cfg.MODEL.RPN.POST_NMS_TOPK_TRAIN=2200
@@ -71,8 +71,8 @@ cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 cfg.SOLVER.BASE_LR = 0.0025
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
 
-cfg.MODEL.WEIGHTS = "/share/dentding_dent/model_0040999.pth"
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # set a custom testing threshold for this model
+cfg.MODEL.WEIGHTS = "/share/scratch_2_data/model_0033999.pth"
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3   # set a custom testing threshold for this model
 
 
 from detectron2.data import build_detection_test_loader
@@ -145,7 +145,7 @@ for cat in category_dict.keys():
                         print(area)
                         area_final=max(area,area_overlaped)
                     area_list.append(area_final)
-                    if area_final>0.5:
+                    if area_final>0.25:
                         tp_temp=tp_temp+1
                         bbox_detected.append(org_keys)
                     else:
