@@ -127,31 +127,36 @@ for cat in category_dict.keys():
             fn_temp=0
             area_list=[]
             bbox_detected=[]
-            for cl,k in zip(classes_pred,bbox_pred):
+            if len(org_bbox_dict.keys())==0:
+                tp_temp=0
+                fp_temp=len(classes_pred[classes_pred==cat])
+                fn_temp=0
+            else:
+                for cl,k in zip(classes_pred,bbox_pred):
                 #print('start')
-                if cl != cat:
-                    continue
-                area_overlaped=0
-                r_pred=Rectangle(k[0],k[1],k[2],k[3])
-                for org_keys in org_bbox_dict.keys():
-                    r_org=org_bbox_dict[org_keys]
-                    print(r_org,r_pred)
-                    area=rect_area(r_org,r_pred)
-                    print(area)
-                    area_final=max(area,area_overlaped)
-                area_list.append(area_final)
-                if area_final>0.5:
-                    tp=tp+1
-                    tp_temp=tp_temp+1
-                    bbox_detected.append(org_keys)
-                else:
-                    fp=fp+1
-                    fp_temp=fp_temp+1
-                print(tp,fp)
-            fn_temp=len(org_bbox_dict.keys()) -len(list(set(bbox_detected)))
-            fn=fn+fn_temp
-            cf_dict_per_image[category_dict[cat]][data['images'][i]['file_name']]={'tp':tp_temp,'fp':fp_temp,'fn':fn_temp,'pred_class':classes_pred,'org_count':org_bbox_dict,'area':area_list}
+                    if cl != cat:
+                        continue
+                    area_overlaped=0
+                    r_pred=Rectangle(k[0],k[1],k[2],k[3])
+                    for org_keys in org_bbox_dict.keys():
+                        r_org=org_bbox_dict[org_keys]
+                        print(r_org,r_pred)
+                        area=rect_area(r_org,r_pred)
+                        print(area)
+                        area_final=max(area,area_overlaped)
+                    area_list.append(area_final)
+                    if area_final>0.5:
+                        tp_temp=tp_temp+1
+                        bbox_detected.append(org_keys)
+                    else:
+                        fp_temp=fp_temp+1
 
+                fn_temp=len(org_bbox_dict.keys()) -len(list(set(bbox_detected)))
+
+            cf_dict_per_image[category_dict[cat]][data['images'][i]['file_name']]={'tp':tp_temp,'fp':fp_temp,'fn':fn_temp,'pred_class':classes_pred,'org_count':org_bbox_dict,'area':area_list}
+            fp=fp+fp_temp
+            tp=tp+tp_temp
+            fn=fn+fn_temp
         except Exception as e:
             print(e)
         
