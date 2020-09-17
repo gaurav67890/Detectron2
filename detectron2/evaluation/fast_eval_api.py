@@ -3,7 +3,7 @@ import copy
 import numpy as np
 import time
 from pycocotools.cocoeval import COCOeval
-
+from collections import defaultdict
 from detectron2 import _C
 
 
@@ -12,6 +12,28 @@ class COCOeval_opt(COCOeval):
     This is a slightly modified version of the original COCO API, where the functions evaluateImg()
     and accumulate() are implemented in C++ to speedup evaluation
     """
+    def __init__(self, cocoGt=None, cocoDt=None, iouType='segm'):
+        '''
+        Initialize CocoEval using coco APIs for gt and dt
+        :param cocoGt: coco object with ground truth annotations
+        :param cocoDt: coco object with detection results
+        :return: None
+        '''
+        if not iouType:
+            print('iouType not specified. use default iouType segm')
+        self.cocoGt   = cocoGt              # ground truth COCO API
+        self.cocoDt   = cocoDt              # detections COCO API
+        self.evalImgs = defaultdict(list)   # per-image per-category evaluation results [KxAxI] elements
+        self.eval     = {}                  # accumulated evaluation results
+        self._gts = defaultdict(list)       # gt for evaluation
+        self._dts = defaultdict(list)       # dt for evaluation
+        self.params = Params(iouType=iouType) # parameters
+        self._paramsEval = {}               # parameters for evaluation
+        self.stats = []                     # result summarization
+        self.ious = {}                      # ious between all gts and dts
+        if not cocoGt is None:
+            self.params.imgIds = sorted(cocoGt.getImgIds())
+            self.params.catIds = sorted(cocoGt.getCatIds())
 
 #     def evaluate(self):
 #         """
@@ -194,4 +216,40 @@ class COCOeval_opt(COCOeval):
             summarize = _summarizeKps
         self.stats = summarize()
 
-        
+class Params:
+    '''
+    Params for coco evaluation api
+    '''
+    def setDetParams(self):
+        self.imgIds = []
+        self.catIds = []
+        # np.arange causes trouble.  the data point on arange is slightly larger than the true value
+        self.iouThrs = np.linspace(.25, 0.95, int(np.round((0.95 - .25) / .05)) + 1, endpoint=True)
+        self.recThrs = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)
+        self.maxDets = [1, 10, 100]
+        self.areaRng = [[0 ** 2, 1e5 ** 2], [0 ** 2, 32 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2]]
+        self.areaRngLbl = ['all', 'small', 'medium', 'large']
+        self.useCats = 1
+
+    def setKpParams(self):
+        self.imgIds = []
+        self.catIds = []
+        # np.arange causes trouble.  the data point on arange is slightly larger than the true value
+        self.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        self.recThrs = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)
+        self.maxDets = [20]
+        self.areaRng = [[0 ** 2, 1e5 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2]]
+        self.areaRngLbl = ['all', 'medium', 'large']
+        self.useCats = 1
+        self.kpt_oks_sigmas = np.array([.26, .25, .25, .35, .35, .79, .79, .72, .72, .62,.62, 1.07, 1.07, .87, .87, .89, .89])/10.0
+
+    def __init__(self, iouType='segm'):
+        if iouType == 'segm' or iouType == 'bbox':
+            self.setDetParams()
+        elif iouType == 'keypoints':
+            self.setKpParams()
+        else:
+            raise Exception('iouType not supported')
+        self.iouType = iouType
+        # useSegm is deprecated
+        self.useSegm = None
