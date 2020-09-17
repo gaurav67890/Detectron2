@@ -33,13 +33,16 @@ from detectron2.data import build_detection_test_loader
 with open('params.yaml', 'r') as stream:
     param_data=yaml.safe_load(stream)
 
-damage_name='merged_scratch'
+damage_name='dent'
 MODE='LOCAL'
 
-dataset_dir=param_data['DATASET'][MODE]['DIR_PATH']
-test_json=dataset_dir+damage_name+param_data['DATASET'][MODE]['TEST_PATH']
-img_dir=dataset_dir+damage_name+param_data['DATASET'][MODE]['IMAGES_PATH']
+test_json='/share/test_total.json'
+train_json='/share/train_total.json'
+img_dir='/share/dent_testing/'
+
 register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
+register_coco_instances(damage_name+"_train", {}, train_json, img_dir)
+#register_coco_instances(damage_name+"_test", {}, test_json, img_dir)
 
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file(param_data['MODEL']['CONFIG']))
@@ -47,19 +50,20 @@ cfg.DATASETS.TEST = (damage_name+"_test",)
 cfg.DATALOADER.NUM_WORKERS = 0
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(param_data['MODEL']['CONFIG'])
 cfg.SOLVER.IMS_PER_BATCH = 4
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2 
-#cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
-#cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=12000
-#cfg.MODEL.RPN.POST_NMS_TOPK_TRAIN=2200
-#cfg.MODEL.RPN.POST_NMS_TOPK_TEST=2200
-#cfg.MODEL.RPN.NMS_THRESH=0.6
-#cfg.SOLVER.MOMENTUM= 0.95
-cfg.SOLVER.BASE_LR = 0.0025
-#cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[8,16, 32, 64, 128]]
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
+#cfg.TEST.EVAL_PERIOD = 500
+cfg.MODEL.RPN.PRE_NMS_TOPK_TRAIN=12000
+cfg.MODEL.RPN.PRE_NMS_TOPK_TEST=6000
+cfg.MODEL.RPN.POST_NMS_TOPK_TRAIN=1800
+cfg.MODEL.RPN.POST_NMS_TOPK_TEST=2000
+cfg.MODEL.RPN.NMS_THRESH=0.73921
+cfg.SOLVER.MOMENTUM= 0.58664
+cfg.SOLVER.BASE_LR = 0.00273
+cfg.MODEL.ANCHOR_GENERATOR.SIZES=[[ 32, 64, 128,256,512]]
 
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
 predictor = DefaultPredictor(cfg)
-cfg.MODEL.WEIGHTS = "/detectron2_repo/output/model_0009999.pth"
+cfg.MODEL.WEIGHTS = "/share/dent_model/model_0007499.pth"
 predictor = DefaultPredictor(cfg)
 val_loader = build_detection_test_loader(cfg, damage_name+"_test")
 evaluator = COCOEvaluator(damage_name+"_test", cfg, False,output_dir=None)
