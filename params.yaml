@@ -18,7 +18,7 @@ DATASET:
     DIR_PATH: "/share/"
     IMAGES_PATH: "/images/"
     TRAIN_PATH: "/scratch_train.json"
-    TEST_PATH: "/scratch_test.json"
+    TEST_PATH: "/test_total.json"
     VAL_PATH: "/scratch_valid.json"
 
 MODEL:
