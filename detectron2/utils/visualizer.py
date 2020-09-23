@@ -399,6 +399,7 @@ class Visualizer:
             keypoints=keypoints,
             assigned_colors=colors,
             alpha=alpha,
+            out_type='pred'
         )
         return self.output
 
@@ -425,6 +426,8 @@ class Visualizer:
                 mask_color = [x / 255 for x in self.metadata.stuff_colors[label]]
             except (AttributeError, IndexError):
                 mask_color = None
+                
+            mask_color=[1,0,0,0]
 
             binary_mask = (sem_seg == label).astype(np.uint8)
             text = self.metadata.stuff_classes[label]
@@ -435,6 +438,7 @@ class Visualizer:
                 text=text,
                 alpha=alpha,
                 area_threshold=area_threshold,
+                
             )
         return self.output
 
@@ -494,17 +498,15 @@ class Visualizer:
             colors = [random_color(rgb=True, maximum=1) for k in category_ids]
         except AttributeError:
             colors = None
-        self.overlay_instances(masks=masks, labels=labels, assigned_colors=colors, alpha=alpha)
+        self.overlay_instances(masks=masks, labels=labels, assigned_colors=colors, alpha=alpha,out_type='pred')
 
         return self.output
 
     def draw_dataset_dict(self, dic):
         """
         Draw annotations/segmentaions in Detectron2 Dataset format.
-
         Args:
             dic (dict): annotation/segmentation data of one image, in Detectron2 Dataset format.
-
         Returns:
             output (VisImage): image object with visualizations.
         """
@@ -528,6 +530,7 @@ class Visualizer:
                 colors = [
                     self._jitter([x / 255 for x in self.metadata.thing_colors[c]]) for c in labels
                 ]
+                
             names = self.metadata.get("thing_classes", None)
             if names:
                 labels = [names[i] for i in labels]
@@ -536,7 +539,7 @@ class Visualizer:
                 for i, a in zip(labels, annos)
             ]
             self.overlay_instances(
-                labels=labels, boxes=boxes, masks=masks, keypoints=keypts, assigned_colors=colors
+                labels=labels, boxes=boxes, masks=masks, keypoints=keypts, assigned_colors=colors,out_type='org'
             )
 
         sem_seg = dic.get("sem_seg", None)
@@ -556,7 +559,9 @@ class Visualizer:
         masks=None,
         keypoints=None,
         assigned_colors=None,
-        alpha=0.5
+        alpha=0.0,
+        out_type=None
+        
     ):
         """
         Args:
@@ -607,6 +612,10 @@ class Visualizer:
             assert len(labels) == num_instances
         if assigned_colors is None:
             assigned_colors = [random_color(rgb=True, maximum=1) for _ in range(num_instances)]
+            if out_type=='org':
+                assigned_colors = [[0,1,0] for _ in range(num_instances)]
+            if out_type=='pred':
+                assigned_colors = [[1,0,0] for _ in range(num_instances)]
         if num_instances == 0:
             return self.output
         if boxes is not None and boxes.shape[1] == 5:
@@ -637,7 +646,7 @@ class Visualizer:
 
             if masks is not None:
                 for segment in masks[i].polygons:
-                    self.draw_polygon(segment.reshape(-1, 2), color, alpha=alpha)
+                    self.draw_polygon(segment.reshape(-1, 2), assigned_colors[i], alpha=alpha)
 
             if labels is not None:
                 # first get a box
@@ -1055,7 +1064,7 @@ class Visualizer:
 
         polygon = mpl.patches.Polygon(
             segment,
-            fill=True,
+            fill=False,
             facecolor=mplc.to_rgb(color) + (alpha,),
             edgecolor=edge_color,
             linewidth=max(self._default_font_size // 15 * self.output.scale, 1),
